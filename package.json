@@ -1,0 +1,21 @@
+{
+  "name": "design-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Universal AI-assisted Design-to-Code Bridge (MasterGo/Figma to MCP & AI Blueprint)",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "dev": "pnpm --filter @design-bridge/mcp-server run dev",
+    "start": "pnpm --filter @design-bridge/mcp-server run start"
+  },
+  "keywords": [
+    "mcp",
+    "design-to-code",
+    "mastergo",
+    "figma",
+    "antigravity",
+    "ai-blueprint"
+  ],
+  "author": "",
+  "license": "MIT"
+}
