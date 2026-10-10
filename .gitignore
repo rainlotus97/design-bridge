@@ -4,3 +4,4 @@ dist/
 *.log
 .design-cache/
 cache/
+.agents/

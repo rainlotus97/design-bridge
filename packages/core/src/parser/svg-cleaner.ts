@@ -132,6 +132,10 @@ export function extractTokensFromSvg(svgContent: string): DesignTokens {
     if (rectMatch && rectMatch[1] && rectMatch[2]) {
       const w = parseFloat(rectMatch[1]);
       const h = parseFloat(rectMatch[2]);
+      const xMatch = clipBody.match(/<rect[^>]*\bx=["'](-?\d+(?:\.\d+)?)["']/i);
+      const yMatch = clipBody.match(/<rect[^>]*\by=["'](-?\d+(?:\.\d+)?)["']/i);
+      const minX = xMatch ? parseFloat(xMatch[1]) : 0;
+      const minY = yMatch ? parseFloat(yMatch[1]) : 0;
       // If it's a small icon area (e.g. 14x14, 16x16, 24x24)
       if (w <= 32 && h <= 32 && id) {
         // Find corresponding <g clip-path="url(#id)">...</g>
@@ -143,8 +147,8 @@ export function extractTokensFromSvg(svgContent: string): DesignTokens {
             id,
             width: w,
             height: h,
-            viewBox: `0 0 ${w} ${h}`,
-            svgString: `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none">\n  ${gMatch[1].trim()}\n</svg>`,
+            viewBox: `${minX} ${minY} ${w} ${h}`,
+            svgString: `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="${minX} ${minY} ${w} ${h}" fill="none">\n  ${gMatch[1].trim()}\n</svg>`,
           });
         }
       }
