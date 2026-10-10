@@ -904,11 +904,11 @@ export function getWebDashboardHtml(port: number): string {
       }, 3200);
     }
 
-    // Helper: Build Complete Explicit Prompt Command
+    // Helper: Build Complete Explicit Prompt Command (neutral, universal, no hardcoded tech stack)
     function buildExplicitCommand(shortId, name, notes) {
       const namePart = name ? '（名称：“' + name + '”）' : '';
-      const notesPart = notes ? '。具体设计要点与规则：“' + notes + '”' : '';
-      return '请使用 design-bridge MCP 获取设计待办 [ID: ' + shortId + ']' + namePart + '，参考其提取的高保真设计截图、矢量 SVG 与 CSS 样式 Token，帮我完整实现高质量的前端组件代码' + notesPart + '。';
+      const notesPart = notes ? '，需求要点：“' + notes + '”' : '';
+      return '请使用 design-bridge MCP 获取设计待办 [ID: ' + shortId + ']' + namePart + '，参考其提取的高保真设计截图、矢量 SVG 与样式 Token' + notesPart + '。';
     }
 
     // Custom Modal Functionality
@@ -986,14 +986,16 @@ export function getWebDashboardHtml(port: number): string {
           const cssText = detail.cssRaw || '';
           editCssInput.value = cssText;
 
-          // Render colors
+          // Render colors (handles both string array ['#fff'] and object array [{hex: '#fff'}])
           editColorsList.innerHTML = '';
           const colors = detail.tokens?.colors || [];
           if (colors.length > 0) {
-            colors.slice(0, 12).forEach(c => {
+            colors.slice(0, 16).forEach(c => {
+              const hex = typeof c === 'string' ? c : (c && (c.hex || c.color) ? (c.hex || c.color) : String(c));
+              if (!hex || hex === 'undefined') return;
               const chip = document.createElement('div');
               chip.className = 'color-chip';
-              chip.innerHTML = '<span class="color-chip-box" style="background:' + c.hex + ';"></span><span>' + c.hex + '</span>';
+              chip.innerHTML = '<span class="color-chip-box" style="background:' + hex + ';"></span><span>' + hex + '</span>';
               editColorsList.appendChild(chip);
             });
           } else {
