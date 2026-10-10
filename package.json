@@ -5,7 +5,7 @@
   "description": "Universal AI-assisted Design-to-Code Bridge (MasterGo/Figma to MCP & AI Blueprint)",
   "scripts": {
     "build": "pnpm -r run build",
-    "dev": "pnpm --filter @design-bridge/mcp-server run dev",
+    "test": "npx tsx test/verify.ts",
     "start": "pnpm --filter @design-bridge/mcp-server run start"
   },
   "keywords": [

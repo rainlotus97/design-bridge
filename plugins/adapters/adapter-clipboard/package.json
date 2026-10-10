@@ -1,0 +1,16 @@
+{
+  "name": "@design-bridge/adapter-clipboard",
+  "version": "0.1.0",
+  "description": "Universal clipboard ingest adapter for DesignBridge",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@design-bridge/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

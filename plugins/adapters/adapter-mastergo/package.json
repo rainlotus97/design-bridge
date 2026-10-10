@@ -1,0 +1,9 @@
+{
+  "name": "@design-bridge/adapter-mastergo",
+  "version": "0.1.0",
+  "description": "MasterGo adapter for DesignBridge (Userscript & Browser Extension)",
+  "main": "dist/mastergo-bridge.user.js",
+  "scripts": {
+    "build": "echo 'Adapter ready'"
+  }
+}

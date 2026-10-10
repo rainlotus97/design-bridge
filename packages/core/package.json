@@ -1,0 +1,19 @@
+{
+  "name": "@design-bridge/core",
+  "version": "0.1.0",
+  "description": "Core token extractor, layout heuristics, and UI blueprint schema",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b",
+    "watch": "tsc -b -w",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
