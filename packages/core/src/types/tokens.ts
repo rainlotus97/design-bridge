@@ -17,6 +17,8 @@ export interface LinearGradientToken {
 export interface ExtractedIcon {
   id: string;
   name?: string;
+  fileName?: string;
+  filePath?: string;
   width: number;
   height: number;
   viewBox: string;
@@ -36,11 +38,13 @@ export interface DesignTokens {
   radii: string[];
   /** Borders / strokes (e.g. ['2px solid #6C6F7F']) */
   borders: string[];
-  /** Standalone icons isolated from the design (typically < 32px) */
+  /** Standalone icons isolated from the design (typically <= 48px) */
   icons: ExtractedIcon[];
   /** Canvas dimensions */
   dimensions?: {
     width: number;
     height: number;
   };
+  /** Ready-to-use CSS Variables declaration block */
+  cssVariables?: string;
 }

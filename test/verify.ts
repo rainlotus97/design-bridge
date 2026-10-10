@@ -100,6 +100,28 @@ async function runVerification() {
   console.log(prompt);
   console.log('---------------------------------------------------------------------');
 
+  // 6. Test Design Inbox features
+  console.log('5️⃣ Testing Design Inbox (Query #1, Delete, Clear)...');
+  const foundByIndex = cacheManager.getByIdOrIndex(1);
+  if (!foundByIndex || foundByIndex.id !== stored.id) {
+    throw new Error('Inbox failed to find capture by index 1');
+  }
+  console.log('   - Found by index #1:', foundByIndex.meta.name);
+
+  const foundByTitle = cacheManager.getByIdOrIndex('船舶监控');
+  if (!foundByTitle || foundByTitle.id !== stored.id) {
+    throw new Error('Inbox failed to find capture by title keyword');
+  }
+  console.log('   - Found by keyword "船舶监控":', foundByTitle.id);
+
+  // Test delete
+  const deleted = cacheManager.deleteCapture(stored.id);
+  if (!deleted || cacheManager.getHistory().length !== 0) {
+    throw new Error('Inbox delete failed');
+  }
+  console.log('   - Successfully deleted item');
+  console.log('   ✅ Design Inbox test passed!\n');
+
   // Clean up test cache
   fs.rmSync(testCacheDir, { recursive: true, force: true });
 

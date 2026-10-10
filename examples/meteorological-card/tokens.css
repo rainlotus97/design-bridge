@@ -1,0 +1,41 @@
+/**
+ * tokens.css
+ * 
+ * 气象信息卡片通用设计规范 (Design Tokens)
+ * 提取自 MasterGo 原始矢量图与样式面板
+ * 可 1:1 无损映射到 Web (CSS/Tailwind)、鸿蒙 (ArkUI) 以及 Qt (QML)
+ */
+
+:root {
+  /* 容器尺寸与边界 (自适应弹性最大宽度，不锁死死高度) */
+  --design-max-width: 388px;
+  --design-min-height: 360px;
+  --design-card-radius: 20px;
+
+  /* 表面材质与高斯模糊 */
+  --design-bg-gradient: linear-gradient(135deg, rgba(32, 37, 54, 0.95) 0%, rgba(14, 16, 25, 0.98) 100%);
+  --design-card-border: 1px solid rgba(108, 111, 127, 0.4);
+  --design-card-blur: 10px;
+
+  /* 结构分割线 */
+  --design-divider: rgba(255, 255, 255, 0.08);
+
+  /* 文本与单位调色板 */
+  --design-text-primary: #FFFFFF;
+  --design-text-secondary: #BBC3C9;
+  --design-text-muted: rgba(255, 255, 255, 0.9);
+
+  /* 标准排版规范 (字号 / 字重) */
+  --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-title-size: 20px;
+  --font-title-weight: 600;
+  --font-value-size: 20px;
+  --font-value-weight: 700;
+  --font-label-size: 14px;
+  --font-unit-size: 14px;
+
+  /* 内边距与栅格间距 */
+  --spacing-card-x: 24px;
+  --spacing-row-gap: 8px;
+  --spacing-icon-gap: 10px;
+}

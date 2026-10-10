@@ -226,7 +226,8 @@
         .then((data) => {
           if (data.success) {
             overlay.remove();
-            showToast('🎉 发送成功！已存入本地，直接切回 Antigravity 告诉 AI 即可');
+            const itemIndex = data.index ? ` #${data.index}` : '';
+            showToast(`🎉 成功存入待办池${itemIndex}！直接对 AI 说：“实现设计${itemIndex}” 即可`);
           } else {
             alert('推送失败: ' + (data.error || '未知错误'));
             btn.innerText = '🚀 确认发送给 AI';
