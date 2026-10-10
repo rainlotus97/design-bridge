@@ -4,31 +4,43 @@ import { HttpReceiver } from '../bridge/http-receiver.js';
 import { runStdioServer } from '../server.js';
 
 async function main() {
+  const args = process.argv.slice(2);
+  const isStdioMode = args.includes('stdio');
+
   const port = parseInt(process.env.DESIGN_BRIDGE_PORT || '23851', 10);
   const cacheManager = new CacheManager();
 
-  // Start background HTTP receiver for browser adapters
   const httpReceiver = new HttpReceiver({
     port,
     cacheManager,
     onCaptureReceived: (capture) => {
-      // Use stderr so stdio MCP transport is not disrupted
       console.error(`[DesignBridge] 📥 Received new capture: ${capture.id} (${capture.meta.name})`);
     },
   });
 
   try {
     await httpReceiver.start();
-    console.error(`[DesignBridge] 🚀 Local HTTP Bridge listening on http://127.0.0.1:${port}`);
+    console.error(`[DesignBridge] 🚀 Local Server started on http://127.0.0.1:${port}`);
+    console.error(`[DesignBridge] 🌐 Web Dashboard: http://127.0.0.1:${port}/`);
+    console.error(`[DesignBridge] 🔌 MCP SSE Server: http://127.0.0.1:${port}/sse`);
     console.error(`[DesignBridge] 📂 Local Cache directory: ${cacheManager.getBaseDir()}`);
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error(`[DesignBridge] ⚠️ Warning: Failed to start HTTP bridge on port ${port}: ${msg}`);
+    console.error(`[DesignBridge] ⚠️ Warning: Failed to start HTTP server on port ${port}: ${msg}`);
   }
 
-  // Connect MCP Stdio Server
-  console.error(`[DesignBridge] 🔌 MCP Stdio Server initializing...`);
-  await runStdioServer(cacheManager);
+  if (isStdioMode) {
+    console.error(`[DesignBridge] 🔌 MCP Stdio Server initializing...`);
+    await runStdioServer(cacheManager);
+  } else {
+    console.error(`[DesignBridge] ✨ Server is running in background mode. Press Ctrl+C to stop.`);
+    // Keep alive for HTTP & SSE
+    process.on('SIGINT', async () => {
+      console.error('\n[DesignBridge] Shutting down server...');
+      await httpReceiver.stop();
+      process.exit(0);
+    });
+  }
 }
 
 main().catch((err) => {

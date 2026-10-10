@@ -5,19 +5,46 @@
 
 ---
 
-## 核心设计理念
+## 🌟 核心特性与双模使用方式
 
-1. **双通道协同（Dual-Input Fusion）**：
-   - **PNG 视觉为主**：发挥多模态大模型的原生空间与排版识别能力，精准提取语义、业务文本与状态插槽，彻底摆脱传统 OCR 识别率低与字体转曲（Path）难题。
-   - **SVG 几何为辅**：提取 `<defs>` 中的毛玻璃参数、渐变色 HEX、独立小图标矢量组件。
-   - **CSS 物理度量为辅**：提供物理级边距（Padding/Margin）、圆角半径（Radius）、阴影（Shadow）事实校准。
-2. **两阶段架构（Two-Stage Process）**：
-   - **Stage 1（AI 规范层）**：将设计事实提炼为中立、严谨的《UI 蓝图规范》（UI Blueprint），明确标记可变插槽（Props）与不变骨架（Invariants）。
-   - **Stage 2（代码生成层）**：由会话 AI 面向 React、Vue 3、Tailwind 等具体工程栈生成高质量生产级代码。
-3. **可插拔适配器生态（Adapter Ecosystem）**：
-   - 各类设计网站提取逻辑以独立插件/脚本形式解耦，即插即用。
-4. **Antigravity 零阻力兼容**：
-   - 本地轻量中继服务（Local Bridge）落盘高清晰预览图至本地缓存，向 Agent 提供标准本地绝对路径，兼顾跨平台文件读取。
+### 1. 无需绝对路径的 MCP Server（URL 协议直连）
+告别死板的本地绝对路径配置，服务运行后原生提供 **SSE 远程 MCP 端点**：
+```json
+{
+  "mcpServers": {
+    "design-bridge": {
+      "url": "http://127.0.0.1:23851/sse"
+    }
+  }
+}
+```
+
+### 2. 双重免油猴采集方式
+- **方式 A：内置 Web 捕获中心（零插件依赖）**
+  - 打开浏览器访问 [http://127.0.0.1:23851/](http://127.0.0.1:23851/)
+  - 在页面任意处按 `Ctrl + V` 粘贴截图，支持贴入 SVG 代码与个性化要求，一键直推本地 AI。
+- **方式 B：原生 Chrome 扩展程序（Manifest V3）**
+  - 目录：`plugins/extension-chrome`
+  - 打开 Chrome `chrome://extensions` 勾选“开发者模式”，点击“加载已解压的扩展程序”选择该目录即可。
+  - 打开 MasterGo、Figma 等页面右下角将自动出现 **⚡ 发送到 AI** 胶囊。
+
+---
+
+## 🚀 启动与使用
+
+### 启动服务
+```bash
+# 进入项目目录
+cd D:\Document\design-bridge
+
+# 启动本地桥梁与 MCP SSE 服务 (端口 23851)
+pnpm start
+```
+
+### 运行自动化测试
+```bash
+pnpm test
+```
 
 ---
 
@@ -27,12 +54,14 @@
 design-bridge/
 ├── packages/
 │   ├── core/                          # 核心清洗与规则引擎 (Tokens/Heuristics/Blueprint)
-│   └── mcp-server/                    # MCP 服务端 + 本地 HTTP 中继服务 + 缓存管理
+│   └── mcp-server/                    # MCP 服务端 + SSE 流端点 + Web 控制台 + 缓存管理
 ├── plugins/
+│   ├── extension-chrome/              # 原生 Chrome 扩展 (Manifest V3, 开发者模式即载)
 │   └── adapters/
-│       ├── adapter-mastergo/          # MasterGo 网页提取插件 / 油猴脚本
-│       └── adapter-clipboard/         # 通用系统剪贴板 / 截图兜底提取器
+│       ├── adapter-mastergo/          # 油猴脚本备用方案
+│       └── adapter-clipboard/         # 纯命令行剪贴板适配器
+├── test/                              # 端到端测试套件与真实 SVG 样本
 ├── pnpm-workspace.yaml
 ├── package.json
-└── PLAN.md                            # 阶段性研发计划
+└── PLAN.md
 ```

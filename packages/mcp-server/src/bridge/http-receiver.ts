@@ -2,7 +2,10 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { Server } from 'node:http';
 import { CapturedDesignPayload, extractTokensFromSvg } from '@design-bridge/core';
+import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { CacheManager, StoredCapture } from '../cache/cache-manager.js';
+import { createDesignBridgeMcpServer } from '../server.js';
+import { getWebDashboardHtml } from './web-dashboard.js';
 
 export interface HttpReceiverOptions {
   port?: number;
@@ -16,6 +19,7 @@ export class HttpReceiver {
   private port: number;
   private cacheManager: CacheManager;
   private onCaptureReceived?: (capture: StoredCapture) => void;
+  private sseTransports: Map<string, SSEServerTransport> = new Map();
 
   constructor(options: HttpReceiverOptions) {
     this.port = options.port ?? 23851;
@@ -35,12 +39,71 @@ export class HttpReceiver {
   }
 
   private setupRoutes(): void {
-    // Health check
-    this.app.get('/health', (_req: Request, res: Response) => {
-      res.json({ status: 'ok', service: 'design-bridge-http-bridge', version: '0.1.0' });
+    // 1. Web Dashboard (Zero-install Dropzone & Paste GUI)
+    this.app.get(['/', '/ui'], (_req: Request, res: Response) => {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.send(getWebDashboardHtml(this.port));
     });
 
-    // Ingest captured design from browser extension or userscript
+    // 2. Health check
+    this.app.get('/health', (_req: Request, res: Response) => {
+      res.json({
+        status: 'ok',
+        service: 'design-bridge-server',
+        version: '0.1.0',
+        sseUrl: `http://127.0.0.1:${this.port}/sse`,
+        activeSseSessions: this.sseTransports.size,
+      });
+    });
+
+    // 3. MCP SSE Stream endpoint (Antigravity connects here directly via URL)
+    this.app.get('/sse', async (_req: Request, res: Response) => {
+      try {
+        console.error(`[DesignBridge] 🔌 New MCP SSE connection initiated...`);
+        const transport = new SSEServerTransport('/message', res);
+        const mcpServer = createDesignBridgeMcpServer(this.cacheManager);
+
+        this.sseTransports.set(transport.sessionId, transport);
+        transport.onclose = () => {
+          console.error(`[DesignBridge] 🔌 MCP SSE connection closed: ${transport.sessionId}`);
+          this.sseTransports.delete(transport.sessionId);
+        };
+
+        await mcpServer.connect(transport);
+        console.error(`[DesignBridge] ✅ MCP SSE connection established: ${transport.sessionId}`);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error(`[DesignBridge] ❌ Error in /sse:`, msg);
+        if (!res.headersSent) {
+          res.status(500).send(`SSE Error: ${msg}`);
+        }
+      }
+    });
+
+    // 4. MCP Post Message endpoint (Handles incoming JSON-RPC commands from MCP client)
+    this.app.post('/message', async (req: Request, res: Response): Promise<void> => {
+      const sessionId = req.query.sessionId as string;
+      const transport = sessionId
+        ? this.sseTransports.get(sessionId)
+        : Array.from(this.sseTransports.values())[0];
+
+      if (!transport) {
+        res.status(400).send('No active SSE session found');
+        return;
+      }
+
+      try {
+        await transport.handlePostMessage(req, res);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error(`[DesignBridge] ❌ Error in /message:`, msg);
+        if (!res.headersSent) {
+          res.status(500).send(msg);
+        }
+      }
+    });
+
+    // 5. Ingest captured design from browser extension, web GUI, or userscript
     this.app.post('/api/capture', (req: Request, res: Response): void => {
       try {
         const payload = req.body as CapturedDesignPayload;
@@ -72,7 +135,7 @@ export class HttpReceiver {
       }
     });
 
-    // Get the latest design payload
+    // 6. Get the latest design payload
     this.app.get('/api/latest', (_req: Request, res: Response): void => {
       const latest = this.cacheManager.getLatest();
       if (!latest) {
@@ -82,7 +145,7 @@ export class HttpReceiver {
       res.json(latest);
     });
 
-    // List historical captures
+    // 7. List historical captures
     this.app.get('/api/history', (_req: Request, res: Response): void => {
       res.json(this.cacheManager.getHistory());
     });

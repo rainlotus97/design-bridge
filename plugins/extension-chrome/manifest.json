@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "DesignBridge - AI 设计转代码助手",
+  "version": "1.0.0",
+  "description": "一键提取 MasterGo、Figma、蓝湖等设计稿视觉截图与 SVG，直通本地 AI 编程助手",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "DesignBridge"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://mastergo.com/*",
+        "*://*.mastergo.com/*",
+        "*://www.figma.com/*",
+        "*://*.lanhuapp.com/*",
+        "*://pixso.cn/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "permissions": [
+    "activeTab",
+    "clipboardRead"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:23851/*",
+    "http://localhost:23851/*"
+  ]
+}
