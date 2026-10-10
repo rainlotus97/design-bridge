@@ -101,19 +101,17 @@
       }
 
       if (!imageBase64 && !svgText) {
-        showToast('剪贴板中未检测到图层图片或 SVG 代码，请先在 MasterGo 中复制图层！', 'info');
+        showToast('⚠️ 未检测到图层！请右键图层点击【复制为 PNG】(Ctrl+Shift+C) 或【复制为 SVG】', 'error');
         return;
       }
 
-      const finalBase64 = imageBase64 || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
-
       const payload = {
-        source: 'mastergo',
+        source: 'mastergo-userscript',
         meta: {
           name: document.title || 'MasterGo Layer',
           url: location.href,
         },
-        image: { base64: finalBase64 },
+        image: { base64: imageBase64 || '' },
         vector: { svgRaw: svgText },
         userNotes: '',
       };

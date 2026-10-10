@@ -10,14 +10,14 @@
   const isFigma = location.hostname.includes('figma.com');
   const isDesignApp = isMasterGo || isFigma;
 
-  let autoPushOnCopy = true; // Enabled by default
+  let autoPushOnCopy = true;
   let isInspectMode = false;
   let hoveredElement = null;
   let inspectOverlay = null;
   let inspectTooltip = null;
   let inspectTopBanner = null;
 
-  // Initialize storage preference
+  // Retrieve stored auto-push preference
   if (chrome?.storage?.local) {
     chrome.storage.local.get(['autoPushOnCopy'], (res) => {
       if (typeof res.autoPushOnCopy === 'boolean') {
@@ -28,7 +28,7 @@
   }
 
   // ==========================================
-  // 1. Toast Notification System (No Alert)
+  // 1. Toast Notification System
   // ==========================================
   function showToast(msg, type = 'success') {
     let container = document.getElementById('db-toast-container');
@@ -37,8 +37,8 @@
       container.id = 'db-toast-container';
       Object.assign(container.style, {
         position: 'fixed',
-        top: '20px',
-        right: '20px',
+        top: '24px',
+        right: '24px',
         zIndex: '2147483647',
         display: 'flex',
         flexDirection: 'column',
@@ -46,7 +46,7 @@
         pointerEvents: 'none',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       });
-      document.documentElement.appendChild(container);
+      document.body.appendChild(container);
     }
 
     const toast = document.createElement('div');
@@ -54,7 +54,7 @@
     const isInfo = type === 'info';
 
     toast.innerHTML = `
-      <span style="font-size: 15px;">${isError ? '❌' : isInfo ? 'ℹ️' : '⚡'}</span>
+      <span style="font-size: 16px;">${isError ? '❌' : isInfo ? 'ℹ️' : '⚡'}</span>
       <span style="font-size: 13px; font-weight: 600; line-height: 1.4;">${msg}</span>
     `;
 
@@ -62,14 +62,14 @@
       pointerEvents: 'auto',
       backgroundColor: isError ? 'rgba(239, 68, 68, 0.95)' : isInfo ? 'rgba(30, 41, 59, 0.95)' : 'rgba(16, 185, 129, 0.95)',
       color: '#FFFFFF',
-      padding: '10px 16px',
-      borderRadius: '10px',
-      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
+      padding: '12px 18px',
+      borderRadius: '12px',
+      boxShadow: '0 8px 28px rgba(0, 0, 0, 0.45)',
       backdropFilter: 'blur(10px)',
       display: 'flex',
       alignItems: 'center',
-      gap: '8px',
-      maxWidth: '380px',
+      gap: '10px',
+      maxWidth: '420px',
       transition: 'all 0.25s ease',
       transform: 'translateY(0)',
       opacity: '1',
@@ -78,99 +78,73 @@
     container.appendChild(toast);
     setTimeout(() => {
       toast.style.opacity = '0';
-      toast.style.transform = 'translateY(-8px)';
+      toast.style.transform = 'translateY(-10px)';
       setTimeout(() => toast.remove(), 250);
     }, 3200);
   }
 
   // ==========================================
-  // 2. Clipboard Direct Push (Alt+D or Copy)
+  // 2. Trigger Privileged Clipboard Push via Background
   // ==========================================
-  async function pushFromClipboard(sourceName = 'clipboard') {
-    try {
-      const clipboardItems = await navigator.clipboard.read();
-      let imageBase64 = '';
-      let svgText = '';
-      let plainText = '';
-
-      for (const item of clipboardItems) {
-        for (const type of item.types) {
-          if (type.startsWith('image/')) {
-            const blob = await item.getType(type);
-            imageBase64 = await blobToBase64(blob);
-          } else if (type === 'text/html' || type === 'image/svg+xml') {
-            const blob = await item.getType(type);
-            const text = await blob.text();
-            if (text.includes('<svg') || type === 'image/svg+xml') {
-              svgText = text;
-            }
-          } else if (type === 'text/plain') {
-            const blob = await item.getType(type);
-            plainText = await blob.text();
-            if (plainText.trim().startsWith('<svg')) {
-              svgText = plainText.trim();
-            }
-          }
-        }
-      }
-
-      if (!imageBase64 && !svgText && !plainText) {
-        showToast('剪贴板中未检测到图片或矢量数据，请先复制图层！', 'info');
-        return;
-      }
-
-      const finalBase64 = imageBase64 || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
-
-      const payload = {
-        source: isMasterGo ? 'mastergo' : isFigma ? 'figma' : sourceName,
-        meta: {
-          name: document.title || '设计图层',
-          url: location.href,
-        },
-        image: { base64: finalBase64 },
-        vector: { svgRaw: svgText },
-        userNotes: plainText && !svgText ? plainText.slice(0, 500) : '',
-      };
-
-      const res = await fetch(`${BRIDGE_URL}/api/capture`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+  function triggerPush(sourceName = 'shortcut') {
+    flashDockButton('正在读取并推送...', '#38BDF8');
+    if (chrome?.runtime?.sendMessage) {
+      chrome.runtime.sendMessage({
+        action: 'trigger-clipboard-push',
+        source: sourceName,
       });
-      const data = await res.json();
-
-      if (data.success) {
-        showToast(`⚡ 已成功推入设计待办池 #${data.index}！`, 'success');
-      } else {
-        showToast(`推送失败: ${data.error || '未知错误'}`, 'error');
-      }
-    } catch (err) {
-      // Permission denied or network issue
-      showToast(`读取剪贴板或推送失败: ${err.message}`, 'error');
     }
   }
 
-  function blobToBase64(blob) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
+  function flashDockButton(text, color) {
+    const pushBtn = document.getElementById('db-btn-push');
+    if (pushBtn) {
+      const origText = pushBtn.innerHTML;
+      pushBtn.innerHTML = text;
+      pushBtn.style.color = color;
+      setTimeout(() => {
+        pushBtn.innerHTML = isDesignApp ? '⚡ 推送选中 (Alt+S)' : '⚡ 剪贴板直推 (Alt+S)';
+        pushBtn.style.color = '#93C5FD';
+      }, 1500);
+    }
   }
 
   // ==========================================
-  // 3. Auto-push on Copy (MasterGo/Figma 专用)
+  // 3. Capture-Phase Keydown Listener (Ctrl+C & Alt+S)
   // ==========================================
-  if (isDesignApp) {
-    window.addEventListener('copy', () => {
-      if (!autoPushOnCopy) return;
-      // Delay slightly for application clipboard write to finish
-      setTimeout(() => {
-        pushFromClipboard('auto-copy');
-      }, 150);
-    });
-  }
+  window.addEventListener(
+    'keydown',
+    (e) => {
+      // 1. Hotkey Alt+S or Alt+Q or Ctrl+Shift+S (Never use Alt+D to avoid Chrome address bar conflict)
+      if (
+        (e.altKey && (e.key === 's' || e.key === 'S' || e.key === 'q' || e.key === 'Q')) ||
+        (e.ctrlKey && e.shiftKey && (e.key === 's' || e.key === 'S'))
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        triggerPush('hotkey-alt-s');
+        return;
+      }
+
+      // 2. Hotkey Alt+X for Element Inspector
+      if (e.altKey && (e.key === 'x' || e.key === 'X')) {
+        e.preventDefault();
+        e.stopPropagation();
+        startElementInspector();
+        return;
+      }
+
+      // 3. In MasterGo/Figma: Intercept Ctrl+C / Ctrl+Shift+C in capture phase
+      if (isDesignApp && (e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C')) {
+        if (!autoPushOnCopy) return;
+        // Wait 200ms for MasterGo internal copy routine to write to system clipboard
+        setTimeout(() => {
+          triggerPush('mastergo-auto-copy');
+        }, 220);
+      }
+    },
+    true // CAPTURE PHASE: Must run before MasterGo preventDefault!
+  );
 
   // ==========================================
   // 4. Universal Web Element Inspector (Alt+X)
@@ -179,7 +153,6 @@
     if (isInspectMode) return;
     isInspectMode = true;
 
-    // Create top indicator banner
     inspectTopBanner = document.createElement('div');
     inspectTopBanner.id = 'db-inspect-banner';
     inspectTopBanner.innerHTML = `
@@ -195,10 +168,10 @@
       zIndex: '2147483647',
       backgroundColor: '#0F172A',
       color: '#38BDF8',
-      padding: '8px 16px',
-      fontSize: '12px',
+      padding: '9px 16px',
+      fontSize: '13px',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
+      boxShadow: '0 2px 14px rgba(0,0,0,0.5)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -206,9 +179,8 @@
       borderBottom: '1px solid rgba(56, 189, 248, 0.4)',
       userSelect: 'none',
     });
-    document.documentElement.appendChild(inspectTopBanner);
+    document.body.appendChild(inspectTopBanner);
 
-    // Create highlight overlay
     inspectOverlay = document.createElement('div');
     inspectOverlay.id = 'db-inspect-overlay';
     Object.assign(inspectOverlay.style, {
@@ -225,7 +197,7 @@
     inspectTooltip = document.createElement('div');
     Object.assign(inspectTooltip.style, {
       position: 'absolute',
-      top: '-24px',
+      top: '-26px',
       left: '0',
       backgroundColor: '#0284C7',
       color: '#FFFFFF',
@@ -237,7 +209,7 @@
       fontFamily: 'monospace',
     });
     inspectOverlay.appendChild(inspectTooltip);
-    document.documentElement.appendChild(inspectOverlay);
+    document.body.appendChild(inspectOverlay);
 
     document.addEventListener('mousemove', onInspectMouseMove, true);
     document.addEventListener('click', onInspectClick, true);
@@ -283,13 +255,12 @@
     const el = target;
     stopElementInspector();
 
-    showToast('正在提取元素截图与样式...', 'info');
+    showToast('正在截取元素并推送...', 'info');
 
     try {
       const rect = el.getBoundingClientRect();
       const computed = window.getComputedStyle(el);
 
-      // Extract key styling rules
       const cssRules = [
         `/* Captured Element: <${el.tagName.toLowerCase()}> */`,
         `width: ${Math.round(rect.width)}px;`,
@@ -303,10 +274,8 @@
         `font-size: ${computed.fontSize};`,
         `display: ${computed.display};`,
         `padding: ${computed.padding};`,
-        `margin: ${computed.margin};`,
       ].join('\n');
 
-      // 1. Try to request high-res tab screenshot from background worker
       let croppedBase64 = '';
       if (chrome?.runtime?.sendMessage) {
         try {
@@ -316,12 +285,9 @@
           if (res?.dataUrl) {
             croppedBase64 = await cropImage(res.dataUrl, rect);
           }
-        } catch {
-          // fallback
-        }
+        } catch {}
       }
 
-      // 2. If tab screenshot not available, create SVG foreignObject snapshot
       if (!croppedBase64) {
         croppedBase64 = await renderElementToDataUrl(el, rect);
       }
@@ -339,7 +305,7 @@
         image: { base64: croppedBase64 },
         vector: { svgRaw: svgRaw },
         styles: { cssRaw: cssRules },
-        userNotes: `从网页选取的 DOM 元素：<${el.tagName.toLowerCase()} class="${el.className || ''}">`,
+        userNotes: `网页元素点选捕获：<${el.tagName.toLowerCase()} class="${el.className || ''}">`,
       };
 
       const res = await fetch(`${BRIDGE_URL}/api/capture`, {
@@ -366,7 +332,6 @@
     }
   }
 
-  // Crop image with device pixel ratio
   function cropImage(dataUrl, rect) {
     return new Promise((resolve) => {
       const img = new Image();
@@ -379,17 +344,7 @@
         canvas.height = cropH;
 
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(
-          img,
-          rect.left * dpr,
-          rect.top * dpr,
-          cropW,
-          cropH,
-          0,
-          0,
-          cropW,
-          cropH
-        );
+        ctx.drawImage(img, rect.left * dpr, rect.top * dpr, cropW, cropH, 0, 0, cropW, cropH);
         resolve(canvas.toDataURL('image/png'));
       };
       img.onerror = () => resolve(dataUrl);
@@ -397,7 +352,6 @@
     });
   }
 
-  // Fallback DOM-to-Canvas renderer
   function renderElementToDataUrl(el, rect) {
     return new Promise((resolve) => {
       try {
@@ -410,9 +364,7 @@
         const xml = new XMLSerializer().serializeToString(clone);
         const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${rect.width}" height="${rect.height}">
           <foreignObject width="100%" height="100%">
-            <div xmlns="http://www.w3.org/1999/xhtml">
-              ${xml}
-            </div>
+            <div xmlns="http://www.w3.org/1999/xhtml">${xml}</div>
           </foreignObject>
         </svg>`;
 
@@ -432,61 +384,63 @@
   }
 
   // ==========================================
-  // 5. Floating Island Dock (页面悬浮工具岛)
+  // 5. Floating Island Dock (醒目位置与快捷直推)
   // ==========================================
   function createFloatingDock() {
-    const existing = document.getElementById('db-floating-dock');
-    if (existing) return;
+    if (document.getElementById('db-floating-dock')) return;
 
     const dock = document.createElement('div');
     dock.id = 'db-floating-dock';
 
     Object.assign(dock.style, {
       position: 'fixed',
-      bottom: '24px',
-      right: '24px',
+      bottom: '36px',
+      right: '48px',
       zIndex: '2147483640',
       backgroundColor: '#0F172A',
       color: '#F8FAFC',
       borderRadius: '24px',
-      border: '1px solid rgba(255, 255, 255, 0.12)',
-      boxShadow: '0 8px 30px rgba(0, 0, 0, 0.45)',
+      border: '1px solid rgba(255, 255, 255, 0.16)',
+      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(56, 189, 248, 0.2)',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       display: 'flex',
       alignItems: 'center',
-      gap: '6px',
-      padding: '6px 12px',
+      gap: '8px',
+      padding: '7px 14px',
       transition: 'all 0.2s ease',
       userSelect: 'none',
       fontSize: '12px',
     });
 
     dock.innerHTML = `
-      <div id="db-btn-logo" style="display: flex; align-items: center; gap: 4px; cursor: pointer; padding: 4px 6px; border-radius: 8px;">
+      <div id="db-btn-logo" style="display: flex; align-items: center; gap: 4px; cursor: pointer; padding: 2px 4px;">
         <span style="font-size: 16px;">⚡</span>
-        <span style="font-weight: 700; color: #38BDF8;">DesignBridge</span>
+        <span style="font-weight: 700; color: #38BDF8;">${isMasterGo ? 'MasterGo 桥梁' : 'DesignBridge'}</span>
       </div>
 
-      <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.15);"></div>
+      <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.18);"></div>
+
+      <button id="db-btn-push" title="一键推送到 AI 待办池 (快捷键: Alt+S 或 Ctrl+C)" style="
+        background: rgba(59, 130, 246, 0.25);
+        border: 1px solid rgba(59, 130, 246, 0.5);
+        color: #93C5FD;
+        padding: 5px 12px;
+        border-radius: 14px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      ">⚡ 推送选中 (Alt+S)</button>
 
       ${isDesignApp ? `
-        <button id="db-btn-push" title="立即读取剪贴板推送到待办池 (Alt+D)" style="
-          background: rgba(59, 130, 246, 0.2);
-          border: 1px solid rgba(59, 130, 246, 0.4);
-          color: #93C5FD;
-          padding: 4px 10px;
-          border-radius: 12px;
-          cursor: pointer;
-          font-weight: 600;
-          font-size: 11px;
-        ">⚡ 推送选中 (Alt+D)</button>
-
         <button id="db-btn-toggle-auto" title="切换复制即推" style="
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(255, 255, 255, 0.12);
           color: ${autoPushOnCopy ? '#34D399' : '#94A3B8'};
-          padding: 4px 8px;
-          border-radius: 12px;
+          padding: 5px 10px;
+          border-radius: 14px;
           cursor: pointer;
           font-size: 11px;
         ">📋 复制即推: ${autoPushOnCopy ? '🟢 开' : '⚪ 关'}</button>
@@ -495,22 +449,12 @@
           background: rgba(56, 189, 248, 0.2);
           border: 1px solid rgba(56, 189, 248, 0.4);
           color: #38BDF8;
-          padding: 4px 10px;
-          border-radius: 12px;
+          padding: 5px 10px;
+          border-radius: 14px;
           cursor: pointer;
           font-weight: 600;
           font-size: 11px;
-        ">🎯 选中元素直推 (Alt+X)</button>
-
-        <button id="db-btn-push" title="剪贴板一键推送 (Alt+D)" style="
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          color: #CBD5E1;
-          padding: 4px 8px;
-          border-radius: 12px;
-          cursor: pointer;
-          font-size: 11px;
-        ">📋 剪贴板直推</button>
+        ">🎯 选元素 (Alt+X)</button>
       `}
 
       <button id="db-btn-inbox" title="打开待办中心" style="
@@ -518,24 +462,20 @@
         border: none;
         color: #94A3B8;
         cursor: pointer;
-        padding: 4px;
-        font-size: 14px;
+        padding: 4px 6px;
+        font-size: 15px;
       ">🌐</button>
     `;
 
-    document.documentElement.appendChild(dock);
+    document.body.appendChild(dock);
 
     // Event Bindings
-    dock.querySelector('#db-btn-logo').onclick = () => {
-      window.open(BRIDGE_URL, '_blank');
-    };
-    dock.querySelector('#db-btn-inbox').onclick = () => {
-      window.open(BRIDGE_URL, '_blank');
-    };
+    dock.querySelector('#db-btn-logo').onclick = () => window.open(BRIDGE_URL, '_blank');
+    dock.querySelector('#db-btn-inbox').onclick = () => window.open(BRIDGE_URL, '_blank');
 
     const pushBtn = dock.querySelector('#db-btn-push');
     if (pushBtn) {
-      pushBtn.onclick = () => pushFromClipboard('dock-button');
+      pushBtn.onclick = () => triggerPush('floating-button');
     }
 
     const toggleAutoBtn = dock.querySelector('#db-btn-toggle-auto');
@@ -564,31 +504,17 @@
     }
   }
 
-  // Keyboard Shortcuts (Alt+X and Alt+D)
-  window.addEventListener('keydown', (e) => {
-    if (e.altKey && (e.key === 'x' || e.key === 'X')) {
-      e.preventDefault();
-      startElementInspector();
-    } else if (e.altKey && (e.key === 'd' || e.key === 'D')) {
-      e.preventDefault();
-      pushFromClipboard('shortcut');
-    }
-  });
-
-  // Listen for messages from background script
+  // Handle messages from background service worker
   if (chrome?.runtime?.onMessage) {
     chrome.runtime.onMessage.addListener((msg) => {
       if (msg.action === 'start-inspect') {
         startElementInspector();
-      } else if (msg.action === 'push-clipboard') {
-        pushFromClipboard('context-menu');
       } else if (msg.action === 'show-toast') {
         showToast(msg.message, msg.type || 'success');
       }
     });
   }
 
-  // Inject dock when DOM ready
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
     createFloatingDock();
   } else {

@@ -196,21 +196,30 @@ export class HttpReceiver {
       res.json({ success: true, clearedCount: count });
     });
 
-    // 11. Update status of a capture
-    this.app.patch('/api/capture/:id', (req: Request, res: Response): void => {
+    // 11. Update capture properties (name, userNotes, status)
+    const updateHandler = (req: Request, res: Response): void => {
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-      const { status } = req.body as { status: 'pending' | 'completed' };
-      if (!status || !['pending', 'completed'].includes(status)) {
+      const { name, userNotes, status } = req.body as {
+        name?: string;
+        userNotes?: string;
+        status?: 'pending' | 'completed';
+      };
+
+      if (status && !['pending', 'completed'].includes(status)) {
         res.status(400).json({ error: 'Invalid status: must be "pending" or "completed"' });
         return;
       }
-      const success = this.cacheManager.updateStatus(id, status);
-      if (success) {
-        res.json({ success: true });
+
+      const updated = this.cacheManager.updateCapture(id, { name, userNotes, status });
+      if (updated) {
+        res.json({ success: true, item: updated });
       } else {
         res.status(404).json({ error: 'Capture not found' });
       }
-    });
+    };
+
+    this.app.patch('/api/capture/:id', updateHandler);
+    this.app.put('/api/capture/:id', updateHandler);
   }
 
   public start(): Promise<number> {

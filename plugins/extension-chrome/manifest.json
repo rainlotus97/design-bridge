@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "DesignBridge - AI 设计与网页直推助手",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "MasterGo/Figma 选中即推送、任意网页元素点选直推至本地 AI (Antigravity/MCP)",
   "action": {
     "default_popup": "popup.html",
@@ -21,7 +21,8 @@
     "activeTab",
     "clipboardRead",
     "contextMenus",
-    "storage"
+    "storage",
+    "offscreen"
   ],
   "host_permissions": [
     "http://127.0.0.1:23851/*",
@@ -37,9 +38,11 @@
     },
     "push-clipboard": {
       "suggested_key": {
-        "default": "Alt+D"
+        "default": "Alt+S",
+        "windows": "Alt+S",
+        "mac": "Alt+S"
       },
-      "description": "剪贴板一键推送"
+      "description": "剪贴板一键推送至 AI 待办池"
     }
   }
 }

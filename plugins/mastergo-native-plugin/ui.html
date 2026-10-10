@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    :root {
+      --bg: #0B0F19;
+      --card-bg: #151D2F;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #3B82F6;
+      --accent-hover: #2563EB;
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+      --success: #10B981;
+      --danger: #EF4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 16px;
+      font-size: 13px;
+      user-select: none;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .status-online {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34D399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .status-offline {
+      background: rgba(239, 68, 68, 0.15);
+      color: #F87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 14px;
+      border: 1px solid var(--card-border);
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .layer-preview {
+      width: 100%;
+      height: 140px;
+      background: #060911;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+    .layer-thumb {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .layer-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .layer-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: #FFF;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+    .layer-size {
+      font-size: 11px;
+      font-family: monospace;
+      color: #38BDF8;
+      background: rgba(56, 189, 248, 0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .tags-row {
+      display: flex;
+      gap: 6px;
+      font-size: 11px;
+    }
+    .tag {
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+    }
+    .tag.active {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34D399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    label { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+    input {
+      width: 100%;
+      background: #0B1120;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 8px 10px;
+      font-size: 12px;
+      outline: none;
+    }
+    input:focus { border-color: var(--accent); }
+    .btn-submit {
+      width: 100%;
+      background: var(--accent);
+      color: #FFF;
+      border: none;
+      padding: 11px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-submit:hover { background: var(--accent-hover); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-submit.success {
+      background: var(--success);
+    }
+    .auto-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    .empty-state {
+      padding: 32px 16px;
+      text-align: center;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .toast {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      background: rgba(16, 185, 129, 0.95);
+      color: #FFF;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      display: none;
+      z-index: 999;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+
+  <div class="header">
+    <div class="title">
+      <span>⚡</span> DesignBridge
+    </div>
+    <div id="status" class="status-badge status-offline">检测服务...</div>
+  </div>
+
+  <div id="selection-card" class="card" style="display: none;">
+    <div class="layer-info">
+      <div id="layer-name" class="layer-name">未命名图层</div>
+      <div id="layer-size" class="layer-size">0×0</div>
+    </div>
+
+    <div class="layer-preview">
+      <img id="layer-thumb" class="layer-thumb" alt="preview" />
+    </div>
+
+    <div class="tags-row">
+      <span class="tag active">📸 2x 原生高清截图</span>
+      <span id="tag-svg" class="tag active">📐 矢量 SVG</span>
+      <span id="tag-css" class="tag active">🎨 CSS 样式</span>
+    </div>
+
+    <div class="form-group">
+      <label>需求备注 / 个性化规则 (可选)：</label>
+      <input id="notes-input" type="text" placeholder="例如：Vue 3 + Tailwind 实现..." />
+    </div>
+
+    <button id="submit-btn" class="btn-submit">
+      <span>⚡</span> 推送到本地 AI 待办池
+    </button>
+
+    <label class="auto-toggle">
+      <input type="checkbox" id="auto-push-chk" />
+      <span>选中即自动直推 (无需每次点击)</span>
+    </label>
+  </div>
+
+  <div id="empty-card" class="card">
+    <div class="empty-state">
+      <div style="font-size: 32px; margin-bottom: 8px;">🎨</div>
+      <strong>请在 MasterGo 画布上选中任意图层</strong><br/>
+      插件将自动提取该图层的 2x 高清 PNG、SVG 矢量及 CSS 属性！
+    </div>
+  </div>
+
+  <script>
+    const SERVER_URL = 'http://127.0.0.1:23851';
+    let currentPayload = null;
+    let autoPush = false;
+
+    const statusBadge = document.getElementById('status');
+    const selectionCard = document.getElementById('selection-card');
+    const emptyCard = document.getElementById('empty-card');
+    const layerNameEl = document.getElementById('layer-name');
+    const layerSizeEl = document.getElementById('layer-size');
+    const layerThumb = document.getElementById('layer-thumb');
+    const submitBtn = document.getElementById('submit-btn');
+    const notesInput = document.getElementById('notes-input');
+    const autoPushChk = document.getElementById('auto-push-chk');
+    const toastEl = document.getElementById('toast');
+
+    function showToast(msg, isSuccess = true) {
+      toastEl.textContent = msg;
+      toastEl.style.background = isSuccess ? 'rgba(16, 185, 129, 0.95)' : 'rgba(239, 68, 68, 0.95)';
+      toastEl.style.display = 'block';
+      setTimeout(() => { toastEl.style.display = 'none'; }, 2600);
+    }
+
+    // Check local server health
+    async function checkServer() {
+      try {
+        const res = await fetch(`${SERVER_URL}/health`);
+        const data = await res.json();
+        if (data.status === 'ok') {
+          statusBadge.className = 'status-badge status-online';
+          statusBadge.textContent = '🟢 本地服务在线';
+          return;
+        }
+      } catch {}
+      statusBadge.className = 'status-badge status-offline';
+      statusBadge.textContent = '🔴 服务未启动 (23851)';
+    }
+    checkServer();
+    setInterval(checkServer, 5000);
+
+    // Listen to messages from MasterGo plugin main.js
+    window.onmessage = async (event) => {
+      const msg = event.data.pluginMessage;
+      if (!msg) return;
+
+      if (msg.type === 'selection') {
+        const data = msg.data;
+        if (!data) {
+          selectionCard.style.display = 'none';
+          emptyCard.style.display = 'flex';
+          currentPayload = null;
+          return;
+        }
+
+        emptyCard.style.display = 'none';
+        selectionCard.style.display = 'flex';
+
+        layerNameEl.textContent = data.name;
+        layerSizeEl.textContent = `${data.width}×${data.height}`;
+
+        // Convert pngBytes to base64
+        const uint8 = new Uint8Array(data.pngBytes);
+        let binary = '';
+        for (let i = 0; i < uint8.byteLength; i++) {
+          binary += String.fromCharCode(uint8[i]);
+        }
+        const base64 = 'data:image/png;base64,' + btoa(binary);
+        layerThumb.src = base64;
+
+        currentPayload = {
+          source: 'mastergo-native-plugin',
+          meta: {
+            name: data.name,
+            width: data.width,
+            height: data.height,
+          },
+          image: {
+            base64: base64,
+            mimeType: 'image/png',
+          },
+          vector: {
+            svgRaw: data.svgString || '',
+          },
+          styles: {
+            cssRaw: data.cssCode || '',
+          },
+        };
+
+        if (autoPush) {
+          pushToLocalServer();
+        }
+      }
+    };
+
+    autoPushChk.onchange = () => {
+      autoPush = autoPushChk.checked;
+      if (autoPush && currentPayload) {
+        pushToLocalServer();
+      }
+    };
+
+    submitBtn.onclick = () => {
+      pushToLocalServer();
+    };
+
+    async function pushToLocalServer() {
+      if (!currentPayload) return;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = '正在直推到 AI 待办池...';
+
+      const payloadToSend = {
+        ...currentPayload,
+        userNotes: notesInput.value.trim(),
+      };
+
+      try {
+        const res = await fetch(`${SERVER_URL}/api/capture`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payloadToSend),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          showToast(`⚡ 已成功推入设计待办池 #${data.index}！`, true);
+          submitBtn.className = 'btn-submit success';
+          submitBtn.textContent = `✅ 已推入待办池 #${data.index}`;
+          setTimeout(() => {
+            submitBtn.className = 'btn-submit';
+            submitBtn.textContent = '⚡ 推送到本地 AI 待办池';
+            submitBtn.disabled = false;
+          }, 2000);
+        } else {
+          showToast('推送失败: ' + (data.error || '未知错误'), false);
+          submitBtn.disabled = false;
+          submitBtn.textContent = '⚡ 重新推送';
+        }
+      } catch (err) {
+        showToast('无法连接本地服务 23851: ' + err.message, false);
+        submitBtn.disabled = false;
+        submitBtn.textContent = '⚡ 重新推送';
+      }
+    }
+  </script>
+</body>
+</html>

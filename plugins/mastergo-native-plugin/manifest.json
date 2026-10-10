@@ -1,0 +1,7 @@
+{
+  "name": "DesignBridge - AI 直推助手",
+  "id": "design-bridge-mastergo",
+  "api": "1.0.0",
+  "main": "main.js",
+  "ui": "ui.html"
+}

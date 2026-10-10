@@ -149,7 +149,46 @@ export function createDesignBridgeMcpServer(cacheManager: CacheManager): McpServ
     }
   );
 
-  // Tool 4: clear_design_inbox (清空全部待办池)
+  // Tool 4: update_design (修改设计待办项)
+  server.tool(
+    'update_design',
+    'Update an existing design capture in the inbox (change title name, user requirements notes, or completion status).',
+    {
+      target: z.string().describe('Design index (#1, 1), ID, or title keyword to update.'),
+      name: z.string().optional().describe('New design title or component name.'),
+      notes: z.string().optional().describe('New or updated user requirements / implementation notes.'),
+      status: z.enum(['pending', 'completed']).optional().describe('New status: "pending" or "completed".'),
+    },
+    async ({ target, name, notes, status }) => {
+      const updated = cacheManager.updateCapture(target, {
+        name,
+        userNotes: notes,
+        status,
+      });
+
+      if (!updated) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `❌ 未找到对应设计项："${target}"。请使用 list_design_inbox 查看现有设计。`,
+            },
+          ],
+        };
+      }
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `✅ 设计 **#${updated.index}** [${updated.id}] 已成功更新！\n* 名称: **${updated.meta.name}**\n* 状态: ${updated.status === 'completed' ? '✅ 已完成' : '⏳ 待办'}\n* 备注: ${updated.userNotes || '无'}`,
+          },
+        ],
+      };
+    }
+  );
+
+  // Tool 5: clear_design_inbox (清空全部待办池)
   server.tool(
     'clear_design_inbox',
     'Clear all design captures from the inbox and disk cache.',

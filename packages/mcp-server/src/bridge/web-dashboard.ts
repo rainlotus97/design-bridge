@@ -111,6 +111,31 @@ export function getWebDashboardHtml(port: number): string {
       align-items: center;
       padding-bottom: 14px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .filter-tabs {
+      display: flex;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .filter-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn.active {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text);
+      font-weight: 600;
     }
     .btn-danger-outline {
       background: transparent;
@@ -155,8 +180,8 @@ export function getWebDashboardHtml(port: number): string {
       border: 1px solid rgba(59, 130, 246, 0.25);
     }
     .item-thumb {
-      width: 64px;
-      height: 64px;
+      width: 68px;
+      height: 68px;
       object-fit: cover;
       border-radius: 8px;
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -170,6 +195,11 @@ export function getWebDashboardHtml(port: number): string {
       gap: 4px;
       min-width: 0;
     }
+    .item-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
     .item-title {
       font-size: 14px;
       font-weight: 600;
@@ -177,6 +207,22 @@ export function getWebDashboardHtml(port: number): string {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    .status-pill {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    .status-pending {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60A5FA;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    .status-completed {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34D399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
     }
     .item-notes {
       font-size: 12px;
@@ -199,7 +245,7 @@ export function getWebDashboardHtml(port: number): string {
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.12);
       color: var(--text);
-      padding: 7px 14px;
+      padding: 7px 12px;
       border-radius: 8px;
       font-size: 12px;
       cursor: pointer;
@@ -212,6 +258,14 @@ export function getWebDashboardHtml(port: number): string {
     .btn-action:hover {
       background: rgba(255, 255, 255, 0.16);
       border-color: rgba(255, 255, 255, 0.25);
+    }
+    .btn-edit {
+      color: #93C5FD;
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+    .btn-edit:hover {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.6);
     }
     .btn-copy.copied {
       background: rgba(16, 185, 129, 0.2);
@@ -250,7 +304,7 @@ export function getWebDashboardHtml(port: number): string {
       gap: 8px;
     }
     label { font-size: 13px; font-weight: 600; color: #CBD5E1; }
-    input, textarea {
+    input, textarea, select {
       width: 100%;
       background: #0B1120;
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -261,7 +315,7 @@ export function getWebDashboardHtml(port: number): string {
       outline: none;
       transition: border-color 0.2s;
     }
-    input:focus, textarea:focus { border-color: var(--accent); }
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); }
     textarea { font-family: monospace; resize: vertical; }
     .btn-submit {
       background: var(--accent);
@@ -413,7 +467,7 @@ export function getWebDashboardHtml(port: number): string {
       border-radius: 16px;
       padding: 24px;
       width: 100%;
-      max-width: 440px;
+      max-width: 480px;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
       transform: scale(0.95);
       transition: transform 0.2s ease;
@@ -490,6 +544,36 @@ export function getWebDashboardHtml(port: number): string {
     </div>
   </div>
 
+  <!-- Edit Design Modal -->
+  <div id="edit-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-title">
+        <span>✏️</span> 编辑设计项 <span id="edit-modal-badge" class="item-badge">#1</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="form-group">
+          <label>🏷️ 设计标题 / 组件名称：</label>
+          <input id="edit-name-input" type="text" placeholder="例如：船舶监控卡片、登录表单..." />
+        </div>
+        <div class="form-group">
+          <label>📝 需求备注 / 个性化规则：</label>
+          <textarea id="edit-notes-input" rows="3" placeholder="例如：采用 Vue 3 + Tailwind 实现，经纬度指标为动态组件传参..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>📌 任务状态：</label>
+          <select id="edit-status-select">
+            <option value="pending">⏳ 待办处理中 (Pending)</option>
+            <option value="completed">✅ 已完成归档 (Completed)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="edit-cancel-btn" class="btn-modal-cancel">取消</button>
+        <button id="edit-save-btn" class="btn-modal-confirm">💾 保存修改</button>
+      </div>
+    </div>
+  </div>
+
   <div class="container">
     <div class="header">
       <div class="header-title">
@@ -516,7 +600,13 @@ export function getWebDashboardHtml(port: number): string {
             在 Antigravity 聊天中，您可直接说：<strong>“实现设计 #1”</strong> 或 <strong>“删除设计 #2”</strong>
           </div>
         </div>
-        <button id="clear-all-btn" class="btn-danger-outline">🧹 清空待办池</button>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="filter-tabs">
+            <button id="filter-pending" class="filter-btn active">待办中</button>
+            <button id="filter-all" class="filter-btn">全部</button>
+          </div>
+          <button id="clear-all-btn" class="btn-danger-outline">🧹 清空待办池</button>
+        </div>
       </div>
 
       <div id="inbox-list" class="inbox-list">
@@ -568,16 +658,41 @@ export function getWebDashboardHtml(port: number): string {
         </p>
       </div>
 
+      <!-- MasterGo Native Plugin Special Card -->
+      <div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(16, 185, 129, 0.15) 100%); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <h4 style="font-size: 16px; font-weight: 700; color: #38BDF8; display: flex; align-items: center; gap: 8px;">
+            <span>🎨</span> MasterGo 官方原生插件 (首选推荐 · 100% 真实图层 2x 高清 PNG + SVG)
+          </h4>
+          <span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38BDF8; border-color: rgba(56, 189, 248, 0.4);">
+            原生引擎导出 · 零假图
+          </span>
+        </div>
+        <p style="font-size: 13px; color: #CBD5E1; line-height: 1.6;">
+          直接调用 MasterGo 内部图形引擎（<code>node.exportAsync</code>），选中任何图层即可秒级提取真实的 2x PNG 高保真截图、无损矢量 SVG 和 CSS 代码，彻底告别浏览器权限限制和绿色占位图！
+        </p>
+        <div class="code-pill">
+          <span id="mg-plugin-path-text">D:\\Document\\design-bridge\\plugins\\mastergo-native-plugin\\manifest.json</span>
+          <button id="copy-mg-plugin-btn" class="btn-action">📋 复制插件路径</button>
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted); line-height: 1.8;">
+          <strong>只需 5 秒即可在 MasterGo 导入启用：</strong><br/>
+          1. 打开 MasterGo 文件，点击左上角主菜单 ➔ <strong>「插件」</strong> ➔ <strong>「开发插件」</strong> ➔ <strong>「导入插件」</strong>；<br/>
+          2. 选择上面的清单文件 <code>manifest.json</code> 即可！<br/>
+          3. 随后在 MasterGo 中选中任意图层，插件面板自动显示 2x 缩略图，点击 <strong>「⚡ 推送到本地 AI 待办池」</strong> 即可直推（还支持选中即自动直推）！
+        </div>
+      </div>
+
       <div class="tools-grid">
         <div class="tool-card">
           <div class="tool-card-title">
             <span>⚡</span> MasterGo / Figma 专属工具
           </div>
           <div class="tool-card-desc">
-            <strong>复制即推 (Auto-push)</strong>：在 MasterGo 中选中任意图层并按下 <code>Ctrl+C</code>，插件自动提取图层图像与 SVG 矢量，0.1 秒静默推送至待办池，完全不需要弹窗确认！
+            <strong>复制即推 (Auto-push)</strong>：在 MasterGo 中选中任意图层并按下 <code>Ctrl+C</code>（或复制为 PNG <code>Ctrl+Shift+C</code>），插件自动提取图层图像与 SVG 矢量，0.2 秒无感推送至待办池！
           </div>
           <div class="tool-card-desc">
-            快捷键：选中图层后按 <code>Alt + D</code> 立即直推。
+            专属快捷键：<strong><code>Alt + S</code></strong> 一键直推（已避开 Chrome 地址栏热键冲突）。
           </div>
         </div>
 
@@ -606,7 +721,8 @@ export function getWebDashboardHtml(port: number): string {
         <ol style="font-size: 12px; color: var(--text-muted); line-height: 1.8; margin-left: 20px;">
           <li>在 Chrome 浏览器地址栏输入：<code>chrome://extensions</code> 并回车；</li>
           <li>打开右上角 <strong>「开发者模式」</strong> 开关；</li>
-          <li>点击左上角 <strong>「加载已解压的扩展程序」</strong>，粘贴并选择上面的文件夹路径即可！</li>
+          <li>点击左上角 <strong>「加载已解压的扩展程序」</strong>，粘贴并选择上面的文件夹路径；</li>
+          <li>如果已加载，点击该扩展卡片右下角的 <strong>刷新 🔄</strong> 图标即可载入最新更新！</li>
         </ol>
       </div>
     </div>
@@ -614,6 +730,10 @@ export function getWebDashboardHtml(port: number): string {
 
   <script>
     let currentBase64 = '';
+    let currentFilter = 'pending'; // 'pending' | 'all'
+    let editingItemId = null;
+    let editingItemIndex = null;
+
     const tabInboxBtn = document.getElementById('tab-inbox-btn');
     const tabAddBtn = document.getElementById('tab-add-btn');
     const tabToolsBtn = document.getElementById('tab-tools-btn');
@@ -623,6 +743,8 @@ export function getWebDashboardHtml(port: number): string {
     const inboxList = document.getElementById('inbox-list');
     const inboxCount = document.getElementById('inbox-count');
     const clearAllBtn = document.getElementById('clear-all-btn');
+    const filterPendingBtn = document.getElementById('filter-pending');
+    const filterAllBtn = document.getElementById('filter-all');
 
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('file-input');
@@ -639,7 +761,16 @@ export function getWebDashboardHtml(port: number): string {
     const modalCancelBtn = document.getElementById('modal-cancel-btn');
     let activeModalConfirmCallback = null;
 
-    // Toast Functionality (replaces browser native alerts)
+    // Edit Modal Elements
+    const editModal = document.getElementById('edit-modal');
+    const editModalBadge = document.getElementById('edit-modal-badge');
+    const editNameInput = document.getElementById('edit-name-input');
+    const editNotesInput = document.getElementById('edit-notes-input');
+    const editStatusSelect = document.getElementById('edit-status-select');
+    const editCancelBtn = document.getElementById('edit-cancel-btn');
+    const editSaveBtn = document.getElementById('edit-save-btn');
+
+    // Toast Functionality
     function showToast(message, type = 'success') {
       const toast = document.createElement('div');
       toast.className = 'toast toast-' + type;
@@ -661,7 +792,7 @@ export function getWebDashboardHtml(port: number): string {
       }, 3000);
     }
 
-    // Custom Modal Functionality (replaces browser native confirm/alert)
+    // Custom Modal Functionality
     function showConfirmModal(options) {
       modalTitle.textContent = options.title || '提示';
       modalBody.textContent = options.message || '';
@@ -694,6 +825,79 @@ export function getWebDashboardHtml(port: number): string {
       closeModal();
     };
 
+    // Edit Modal Handlers
+    function openEditModal(item) {
+      editingItemId = item.id;
+      editingItemIndex = item.index;
+      editModalBadge.textContent = '#' + item.index;
+      editNameInput.value = item.meta?.name || '';
+      editNotesInput.value = item.userNotes || '';
+      editStatusSelect.value = item.status || 'pending';
+      editModal.classList.add('show');
+    }
+
+    function closeEditModal() {
+      editModal.classList.remove('show');
+      editingItemId = null;
+      editingItemIndex = null;
+    }
+
+    editCancelBtn.onclick = closeEditModal;
+    editModal.onclick = (e) => {
+      if (e.target === editModal) closeEditModal();
+    };
+
+    editSaveBtn.onclick = () => {
+      if (!editingItemId) return;
+      const newName = editNameInput.value.trim();
+      const newNotes = editNotesInput.value.trim();
+      const newStatus = editStatusSelect.value;
+
+      editSaveBtn.disabled = true;
+      editSaveBtn.textContent = '正在保存...';
+
+      fetch('/api/capture/' + encodeURIComponent(editingItemId), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newName,
+          userNotes: newNotes,
+          status: newStatus,
+        }),
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          showToast('✅ 设计 #' + editingItemIndex + ' 修改成功！', 'success');
+          closeEditModal();
+          loadInbox();
+        } else {
+          showToast('保存失败: ' + (data.error || '未知错误'), 'error');
+        }
+      })
+      .catch(err => {
+        showToast('请求失败: ' + err.message, 'error');
+      })
+      .finally(() => {
+        editSaveBtn.disabled = false;
+        editSaveBtn.textContent = '💾 保存修改';
+      });
+    };
+
+    // Filter toggle
+    filterPendingBtn.onclick = () => {
+      currentFilter = 'pending';
+      filterPendingBtn.classList.add('active');
+      filterAllBtn.classList.remove('active');
+      loadInbox();
+    };
+    filterAllBtn.onclick = () => {
+      currentFilter = 'all';
+      filterAllBtn.classList.add('active');
+      filterPendingBtn.classList.remove('active');
+      loadInbox();
+    };
+
     // Switch Tabs
     function switchTab(activeBtn, activeSection) {
       [tabInboxBtn, tabAddBtn, tabToolsBtn].forEach(b => b.classList.remove('active'));
@@ -708,6 +912,17 @@ export function getWebDashboardHtml(port: number): string {
     };
     tabAddBtn.onclick = () => switchTab(tabAddBtn, sectionAdd);
     tabToolsBtn.onclick = () => switchTab(tabToolsBtn, sectionTools);
+
+    // MasterGo native plugin path copy button
+    const copyMgPluginBtn = document.getElementById('copy-mg-plugin-btn');
+    if (copyMgPluginBtn) {
+      copyMgPluginBtn.onclick = () => {
+        const path = document.getElementById('mg-plugin-path-text').innerText;
+        navigator.clipboard.writeText(path).then(() => {
+          showToast('已复制 MasterGo 插件清单路径！去 MasterGo 导入吧', 'success');
+        });
+      };
+    }
 
     // Extension path copy button
     const copyExtPathBtn = document.getElementById('copy-ext-path-btn');
@@ -809,13 +1024,15 @@ export function getWebDashboardHtml(port: number): string {
 
     // Load Inbox Items
     function loadInbox() {
-      fetch('/api/inbox')
+      const endpoint = currentFilter === 'all' ? '/api/history' : '/api/inbox';
+      fetch(endpoint)
         .then(res => res.json())
         .then(items => {
           inboxCount.innerText = items.length;
           inboxList.innerHTML = '';
           if (items.length === 0) {
-            inboxList.innerHTML = '<div class="empty-state">📭 待办池为空。<br/><button id="btn-quick-add" class="btn-action" style="margin-top: 10px;">➕ 立即粘贴添加设计</button></div>';
+            const emptyTip = currentFilter === 'all' ? '待办记录为空。' : '📭 暂无待处理设计。';
+            inboxList.innerHTML = '<div class="empty-state">' + emptyTip + '<br/><button id="btn-quick-add" class="btn-action" style="margin-top: 10px;">➕ 立即粘贴添加设计</button></div>';
             const quickAdd = document.getElementById('btn-quick-add');
             if (quickAdd) quickAdd.onclick = () => tabAddBtn.click();
             return;
@@ -840,10 +1057,20 @@ export function getWebDashboardHtml(port: number): string {
             const content = document.createElement('div');
             content.className = 'item-content';
 
+            const titleRow = document.createElement('div');
+            titleRow.className = 'item-title-row';
+
             const title = document.createElement('div');
             title.className = 'item-title';
             title.textContent = item.meta.name || '未命名设计';
-            content.appendChild(title);
+            titleRow.appendChild(title);
+
+            const statusPill = document.createElement('span');
+            statusPill.className = 'status-pill ' + (item.status === 'completed' ? 'status-completed' : 'status-pending');
+            statusPill.textContent = item.status === 'completed' ? '✅ 已完成' : '⏳ 待办';
+            titleRow.appendChild(statusPill);
+
+            content.appendChild(titleRow);
 
             if (item.userNotes) {
               const notes = document.createElement('div');
@@ -860,17 +1087,27 @@ export function getWebDashboardHtml(port: number): string {
             const actions = document.createElement('div');
             actions.className = 'item-actions';
 
+            // Edit button
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn-action btn-edit';
+            editBtn.setAttribute('data-id', item.id);
+            editBtn.textContent = '✏️ 编辑';
+            editBtn.onclick = () => openEditModal(item);
+
+            // Copy button
             const copyBtn = document.createElement('button');
             copyBtn.className = 'btn-action btn-copy';
             copyBtn.setAttribute('data-index', String(item.index));
             copyBtn.textContent = '📋 复制指令';
 
+            // Delete button
             const delBtn = document.createElement('button');
             delBtn.className = 'btn-action btn-delete';
             delBtn.setAttribute('data-id', item.id);
             delBtn.setAttribute('data-index', String(item.index));
             delBtn.textContent = '🗑️ 删除';
 
+            actions.appendChild(editBtn);
             actions.appendChild(copyBtn);
             actions.appendChild(delBtn);
 
@@ -900,7 +1137,7 @@ export function getWebDashboardHtml(port: number): string {
             confirmText: '🗑️ 确认删除',
             isDanger: true,
             onConfirm: () => {
-              fetch('/api/capture/' + id, { method: 'DELETE' })
+              fetch('/api/capture/' + encodeURIComponent(id), { method: 'DELETE' })
                 .then(() => {
                   showToast('已删除设计 #' + index, 'info');
                   loadInbox();
