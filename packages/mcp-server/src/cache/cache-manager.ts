@@ -3,8 +3,16 @@ import path from 'node:path';
 import os from 'node:os';
 import { CapturedDesignPayload, DesignTokens, extractTokensFromSvg } from '@design-bridge/core';
 
+export function generateGitStyleId(): string {
+  // 7-character hexadecimal hash like git commit SHA
+  const timestampHex = (Math.floor(Date.now() / 1000) % 0xfffff).toString(16).padStart(5, '0');
+  const randHex = Math.floor(Math.random() * 256).toString(16).padStart(2, '0');
+  return `${timestampHex}${randHex}`;
+}
+
 export interface StoredCapture {
-  id: string;
+  id: string; // Permanent Unique ID, e.g. "1791611589986_6l6wq"
+  shortId: string; // 7-char Git-style commit hash, e.g. "a7f93b2"
   index: number;
   timestamp: number;
   dirPath: string;
@@ -58,7 +66,13 @@ export class CacheManager {
 
     const str = String(query).trim();
 
-    // Check if query is #1 or numeric index (1, 2, 3)
+    // 1. Check exact or prefix Git-style shortId or full ID match
+    const foundById = this.history.find(
+      (item) => item.shortId === str || item.id === str || item.id.startsWith(str) || (item.shortId && item.shortId.startsWith(str))
+    );
+    if (foundById) return foundById;
+
+    // 2. Check #1 or numeric index (1, 2, 3)
     const indexMatch = str.match(/^#?(\d+)$/);
     if (indexMatch && indexMatch[1]) {
       const idx = parseInt(indexMatch[1], 10);
@@ -66,11 +80,7 @@ export class CacheManager {
       if (foundByIndex) return foundByIndex;
     }
 
-    // Check exact or prefix ID match
-    const foundById = this.history.find((item) => item.id === str || item.id.startsWith(str));
-    if (foundById) return foundById;
-
-    // Check layer title match
+    // 3. Check layer title match
     const lower = str.toLowerCase();
     const foundByTitle = this.history.find((item) =>
       item.meta.name?.toLowerCase().includes(lower)
@@ -85,7 +95,8 @@ export class CacheManager {
    * Automatically isolates and writes standalone .svg icon files into `icons/`.
    */
   public saveCapture(payload: CapturedDesignPayload, tokens: DesignTokens): StoredCapture {
-    const id = `${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+    const shortId = generateGitStyleId();
+    const id = `${Date.now()}_${shortId}`;
     const captureDir = path.join(this.baseDir, id);
     fs.mkdirSync(captureDir, { recursive: true });
 
@@ -136,6 +147,7 @@ export class CacheManager {
     // 5. Save metadata JSON
     const stored: StoredCapture = {
       id,
+      shortId,
       index: nextIndex,
       timestamp: payload.timestamp || Date.now(),
       dirPath: captureDir,
@@ -204,7 +216,37 @@ export class CacheManager {
   }
 
   /**
-   * Update design properties (name, userNotes, status) and persist to disk.
+   * Get full details of a capture including raw SVG and CSS content from disk.
+   */
+  public getCaptureDetail(query: string | number): (StoredCapture & { svgRaw?: string; cssRaw?: string }) | null {
+    const target = this.getByIdOrIndex(query);
+    if (!target) return null;
+
+    let svgRaw = '';
+    if (target.svgPath && fs.existsSync(target.svgPath)) {
+      try {
+        svgRaw = fs.readFileSync(target.svgPath, 'utf8');
+      } catch {}
+    }
+
+    let cssRaw = '';
+    if (target.cssPath && fs.existsSync(target.cssPath)) {
+      try {
+        cssRaw = fs.readFileSync(target.cssPath, 'utf8');
+      } catch {}
+    } else if (target.tokens?.cssVariables) {
+      cssRaw = target.tokens.cssVariables;
+    }
+
+    return {
+      ...target,
+      svgRaw,
+      cssRaw,
+    };
+  }
+
+  /**
+   * Update design properties (name, userNotes, status, svgRaw, cssRaw) and persist to disk.
    */
   public updateCapture(
     query: string | number,
@@ -212,6 +254,8 @@ export class CacheManager {
       name?: string;
       userNotes?: string;
       status?: 'pending' | 'completed';
+      svgRaw?: string;
+      cssRaw?: string;
     }
   ): StoredCapture | null {
     const target = this.getByIdOrIndex(query);
@@ -225,6 +269,21 @@ export class CacheManager {
     }
     if (updates.status !== undefined) {
       target.status = updates.status;
+    }
+
+    if (updates.svgRaw !== undefined) {
+      const svgPath = path.join(target.dirPath, 'source.svg');
+      fs.writeFileSync(svgPath, updates.svgRaw, 'utf8');
+      target.svgPath = svgPath;
+      try {
+        target.tokens = extractTokensFromSvg(updates.svgRaw);
+      } catch {}
+    }
+
+    if (updates.cssRaw !== undefined) {
+      const cssPath = path.join(target.dirPath, 'source.css');
+      fs.writeFileSync(cssPath, updates.cssRaw, 'utf8');
+      target.cssPath = cssPath;
     }
 
     try {
@@ -262,6 +321,9 @@ export class CacheManager {
         if (fs.existsSync(metaPath)) {
           const content = JSON.parse(fs.readFileSync(metaPath, 'utf8')) as StoredCapture;
           if (!content.status) content.status = 'pending';
+          if (!content.shortId) {
+            content.shortId = content.id.length > 7 ? content.id.slice(-7) : content.id;
+          }
 
           // If source.svg exists, refresh tokens to ensure latest icon parser fixes are applied
           const sourceSvgPath = path.join(itemDir, 'source.svg');

@@ -168,6 +168,17 @@ export class HttpReceiver {
       res.json(this.cacheManager.getHistory());
     });
 
+    // 8.5. Get full detail for a specific capture (including raw SVG and CSS)
+    this.app.get('/api/capture/:id', (req: Request, res: Response): void => {
+      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      const detail = this.cacheManager.getCaptureDetail(id);
+      if (detail) {
+        res.json(detail);
+      } else {
+        res.status(404).json({ error: 'Capture not found' });
+      }
+    });
+
     // 9. Serve thumbnail image for a capture
     this.app.get('/api/image/:id', (req: Request, res: Response): void => {
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
@@ -179,7 +190,7 @@ export class HttpReceiver {
       }
     });
 
-    // 9. Delete specific capture by ID or index
+    // 10. Delete specific capture by ID or index
     this.app.delete('/api/capture/:id', (req: Request, res: Response): void => {
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
       const success = this.cacheManager.deleteCapture(id);
@@ -190,19 +201,21 @@ export class HttpReceiver {
       }
     });
 
-    // 10. Clear entire Design Inbox
+    // 11. Clear entire Design Inbox
     this.app.post('/api/clear', (_req: Request, res: Response): void => {
       const count = this.cacheManager.clearAll();
       res.json({ success: true, clearedCount: count });
     });
 
-    // 11. Update capture properties (name, userNotes, status)
+    // 12. Update capture properties (name, userNotes, status, svgRaw, cssRaw)
     const updateHandler = (req: Request, res: Response): void => {
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-      const { name, userNotes, status } = req.body as {
+      const { name, userNotes, status, svgRaw, cssRaw } = req.body as {
         name?: string;
         userNotes?: string;
         status?: 'pending' | 'completed';
+        svgRaw?: string;
+        cssRaw?: string;
       };
 
       if (status && !['pending', 'completed'].includes(status)) {
@@ -210,7 +223,7 @@ export class HttpReceiver {
         return;
       }
 
-      const updated = this.cacheManager.updateCapture(id, { name, userNotes, status });
+      const updated = this.cacheManager.updateCapture(id, { name, userNotes, status, svgRaw, cssRaw });
       if (updated) {
         res.json({ success: true, item: updated });
       } else {

@@ -36,7 +36,7 @@ export function getWebDashboardHtml(port: number): string {
     }
     .container {
       width: 100%;
-      max-width: 980px;
+      max-width: 1020px;
       display: flex;
       flex-direction: column;
       gap: 24px;
@@ -171,17 +171,19 @@ export function getWebDashboardHtml(port: number): string {
       background: rgba(255, 255, 255, 0.05);
     }
     .item-badge {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      color: var(--accent);
+      color: #93C5FD;
       background: rgba(59, 130, 246, 0.15);
       padding: 4px 10px;
       border-radius: 6px;
-      border: 1px solid rgba(59, 130, 246, 0.25);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      font-family: monospace;
+      white-space: nowrap;
     }
     .item-thumb {
-      width: 68px;
-      height: 68px;
+      width: 72px;
+      height: 72px;
       object-fit: cover;
       border-radius: 8px;
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -192,7 +194,7 @@ export function getWebDashboardHtml(port: number): string {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 5px;
       min-width: 0;
     }
     .item-title-row {
@@ -201,7 +203,7 @@ export function getWebDashboardHtml(port: number): string {
       gap: 8px;
     }
     .item-title {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 600;
       color: var(--text);
       white-space: nowrap;
@@ -210,9 +212,10 @@ export function getWebDashboardHtml(port: number): string {
     }
     .status-pill {
       font-size: 11px;
-      padding: 2px 6px;
+      padding: 2px 7px;
       border-radius: 4px;
       font-weight: 500;
+      white-space: nowrap;
     }
     .status-pending {
       background: rgba(59, 130, 246, 0.15);
@@ -234,6 +237,7 @@ export function getWebDashboardHtml(port: number): string {
     .item-meta {
       font-size: 11px;
       color: var(--text-muted);
+      font-family: monospace;
     }
     .item-actions {
       display: flex;
@@ -248,54 +252,51 @@ export function getWebDashboardHtml(port: number): string {
       padding: 7px 12px;
       border-radius: 8px;
       font-size: 12px;
+      font-weight: 500;
       cursor: pointer;
       transition: all 0.2s;
       white-space: nowrap;
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
     }
     .btn-action:hover {
-      background: rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.14);
       border-color: rgba(255, 255, 255, 0.25);
     }
-    .btn-edit {
+    .btn-action.btn-copy {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: rgba(59, 130, 246, 0.4);
       color: #93C5FD;
-      border-color: rgba(59, 130, 246, 0.3);
     }
-    .btn-edit:hover {
-      background: rgba(59, 130, 246, 0.15);
-      border-color: rgba(59, 130, 246, 0.6);
+    .btn-action.btn-copy:hover {
+      background: rgba(59, 130, 246, 0.35);
     }
-    .btn-copy.copied {
-      background: rgba(16, 185, 129, 0.2);
-      border-color: rgba(16, 185, 129, 0.5);
-      color: #34D399;
+    .btn-action.copied {
+      background: rgba(16, 185, 129, 0.25) !important;
+      border-color: rgba(16, 185, 129, 0.5) !important;
+      color: #34D399 !important;
     }
-    .btn-delete {
+    .btn-action.btn-delete:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.4);
       color: #F87171;
-      border-color: rgba(239, 68, 68, 0.25);
-    }
-    .btn-delete:hover {
-      background: rgba(239, 68, 68, 0.15);
-      border-color: rgba(239, 68, 68, 0.5);
     }
     .dropzone {
       border: 2px dashed rgba(255, 255, 255, 0.2);
       border-radius: 12px;
-      padding: 36px 20px;
+      padding: 32px 24px;
       text-align: center;
       cursor: pointer;
       transition: all 0.2s;
-      background: rgba(255, 255, 255, 0.02);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
     }
-    .dropzone:hover, .dropzone.dragover {
+    .dropzone:hover {
       border-color: var(--accent);
-      background: rgba(59, 130, 246, 0.06);
+      background: rgba(59, 130, 246, 0.05);
     }
     .dropzone-icon { font-size: 32px; }
     .form-group {
@@ -421,7 +422,7 @@ export function getWebDashboardHtml(port: number): string {
       backdrop-filter: blur(12px);
       animation: toastSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       transition: all 0.2s;
-      max-width: 380px;
+      max-width: 440px;
     }
     .toast.toast-success {
       border-color: rgba(16, 185, 129, 0.4);
@@ -447,7 +448,7 @@ export function getWebDashboardHtml(port: number): string {
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.75);
       backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
@@ -456,6 +457,7 @@ export function getWebDashboardHtml(port: number): string {
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.2s ease;
+      padding: 20px;
     }
     .modal-backdrop.show {
       opacity: 1;
@@ -463,17 +465,22 @@ export function getWebDashboardHtml(port: number): string {
     }
     .modal-card {
       background: #151D2F;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.14);
       border-radius: 16px;
       padding: 24px;
       width: 100%;
-      max-width: 480px;
+      max-width: 500px;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
       transform: scale(0.95);
       transition: transform 0.2s ease;
       display: flex;
       flex-direction: column;
       gap: 16px;
+    }
+    .modal-card.modal-lg {
+      max-width: 860px;
+      max-height: 90vh;
+      overflow-y: auto;
     }
     .modal-backdrop.show .modal-card {
       transform: scale(1);
@@ -493,8 +500,10 @@ export function getWebDashboardHtml(port: number): string {
     .modal-actions {
       display: flex;
       justify-content: flex-end;
+      align-items: center;
       gap: 10px;
       margin-top: 8px;
+      flex-wrap: wrap;
     }
     .btn-modal-cancel {
       background: transparent;
@@ -526,6 +535,33 @@ export function getWebDashboardHtml(port: number): string {
     .btn-modal-confirm:hover {
       opacity: 0.9;
     }
+
+    /* Edit Modal Grid */
+    .edit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 768px) {
+      .edit-grid { grid-template-columns: 1fr; }
+    }
+    .color-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #0B0F19;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-family: monospace;
+    }
+    .color-chip-box {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
   </style>
 </head>
 <body>
@@ -544,32 +580,109 @@ export function getWebDashboardHtml(port: number): string {
     </div>
   </div>
 
-  <!-- Edit Design Modal -->
+  <!-- Full Visual Design Inspector & Editor Modal -->
   <div id="edit-modal" class="modal-backdrop">
-    <div class="modal-card">
-      <div class="modal-title">
-        <span>✏️</span> 编辑设计项 <span id="edit-modal-badge" class="item-badge">#1</span>
+    <div class="modal-card modal-lg">
+      <div class="modal-title" style="justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>✏️</span> 设计资产核验与编辑
+          <span id="edit-modal-badge" class="item-badge">🆔 ------</span>
+        </div>
+        <button id="edit-close-x" style="background: transparent; border: none; color: #94A3B8; font-size: 18px; cursor: pointer;">✕</button>
       </div>
-      <div style="display: flex; flex-direction: column; gap: 14px;">
-        <div class="form-group">
-          <label>🏷️ 设计标题 / 组件名称：</label>
-          <input id="edit-name-input" type="text" placeholder="例如：船舶监控卡片、登录表单..." />
+
+      <div class="edit-grid">
+        <!-- Left: Visual Assets Preview -->
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <!-- Real PNG Image Preview -->
+          <div class="form-group">
+            <label style="display: flex; justify-content: space-between;">
+              <span>🖼️ 高保真截图 (PNG 预览)：</span>
+              <a id="edit-img-link" href="#" target="_blank" style="color: #60A5FA; font-size: 11px; text-decoration: none;">🔍 查看原图</a>
+            </label>
+            <div style="
+              background: #0B0F19;
+              border: 1px solid rgba(255,255,255,0.1);
+              border-radius: 8px;
+              min-height: 140px;
+              max-height: 220px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              overflow: hidden;
+            ">
+              <img id="edit-img-preview" style="max-width: 100%; max-height: 220px; object-fit: contain;" alt="Image Preview" />
+            </div>
+            <div id="edit-img-info" style="font-size: 11px; color: var(--text-muted); font-family: monospace;"></div>
+          </div>
+
+          <!-- Live Rendered SVG Graphic -->
+          <div class="form-group">
+            <label>📐 矢量 SVG 实时动态渲染：</label>
+            <div style="
+              background: #0B0F19;
+              border: 1px solid rgba(255,255,255,0.1);
+              border-radius: 8px;
+              min-height: 80px;
+              max-height: 160px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              padding: 10px;
+              overflow: hidden;
+            ">
+              <div id="edit-svg-render-content" style="max-width: 100%; max-height: 140px;"></div>
+            </div>
+          </div>
+
+          <!-- Color Token Chips -->
+          <div class="form-group">
+            <label>🎨 提取到的色彩 Token：</label>
+            <div id="edit-colors-list" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 24px;"></div>
+          </div>
         </div>
-        <div class="form-group">
-          <label>📝 需求备注 / 个性化规则：</label>
-          <textarea id="edit-notes-input" rows="3" placeholder="例如：采用 Vue 3 + Tailwind 实现，经纬度指标为动态组件传参..."></textarea>
-        </div>
-        <div class="form-group">
-          <label>📌 任务状态：</label>
-          <select id="edit-status-select">
-            <option value="pending">⏳ 待办处理中 (Pending)</option>
-            <option value="completed">✅ 已完成归档 (Completed)</option>
-          </select>
+
+        <!-- Right: Editable Code & Meta Parameters -->
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div class="form-group">
+            <label>🏷️ 设计标题 / 组件名称：</label>
+            <input id="edit-name-input" type="text" placeholder="例如：船舶监控卡片、登录表单..." />
+          </div>
+
+          <div class="form-group">
+            <label>📝 需求备注 / 个性化规则：</label>
+            <textarea id="edit-notes-input" rows="2" placeholder="例如：采用 Vue 3 + Tailwind 实现，经纬度指标为动态组件传参..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>📌 任务状态：</label>
+            <select id="edit-status-select">
+              <option value="pending">⏳ 待办处理中 (Pending)</option>
+              <option value="completed">✅ 已完成归档 (Completed)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>📐 SVG 矢量代码 (可修改，实时更新左侧渲染)：</label>
+            <textarea id="edit-svg-input" rows="4" placeholder="SVG 矢量源码..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>🎨 CSS 样式代码 (可修改)：</label>
+            <textarea id="edit-css-input" rows="4" placeholder="CSS 属性样式..."></textarea>
+          </div>
         </div>
       </div>
-      <div class="modal-actions">
-        <button id="edit-cancel-btn" class="btn-modal-cancel">取消</button>
-        <button id="edit-save-btn" class="btn-modal-confirm">💾 保存修改</button>
+
+      <div class="modal-actions" style="justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px;">
+        <button id="edit-copy-prompt-btn" class="btn-action btn-copy" style="padding: 8px 14px;">
+          📋 复制完整 AI 指令
+        </button>
+
+        <div style="display: flex; gap: 8px;">
+          <button id="edit-cancel-btn" class="btn-modal-cancel">取消</button>
+          <button id="edit-save-btn" class="btn-modal-confirm">💾 保存修改</button>
+        </div>
       </div>
     </div>
   </div>
@@ -588,7 +701,7 @@ export function getWebDashboardHtml(port: number): string {
     <div class="tabs">
       <button id="tab-inbox-btn" class="tab-btn active">📋 设计待办池 (<span id="inbox-count">0</span>)</button>
       <button id="tab-add-btn" class="tab-btn">➕ 提交新设计</button>
-      <button id="tab-tools-btn" class="tab-btn">🛠️ 浏览器专属插件 (独立页面直推)</button>
+      <button id="tab-tools-btn" class="tab-btn">🛠️ 网页专属直推悬浮窗 (零权限要求)</button>
     </div>
 
     <!-- Section 1: Inbox List -->
@@ -597,7 +710,7 @@ export function getWebDashboardHtml(port: number): string {
         <div>
           <h3 style="font-size: 15px; font-weight: 600;">已保存的设计任务池</h3>
           <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
-            在 Antigravity 聊天中，您可直接说：<strong>“实现设计 #1”</strong> 或 <strong>“删除设计 #2”</strong>
+            每一项均有<strong>永久唯一 Git 风格 ID</strong>，点击【📋 复制完整指令】后直接粘贴到 Antigravity 聊天即可！
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -640,7 +753,12 @@ export function getWebDashboardHtml(port: number): string {
       </div>
 
       <div class="form-group">
-        <label>📝 4. 需求备注 / 个性化规则 (可选)</label>
+        <label>🎨 4. CSS 样式代码 (可选)</label>
+        <textarea id="css-input" rows="3" placeholder="在此粘贴 CSS 代码（例如：background, border-radius...）"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>📝 5. 需求备注 / 个性化规则 (可选)</label>
         <input id="notes-input" type="text" placeholder="例如：采用 Vue 3 + Tailwind 实现，经纬度指标为动态组件传参..." />
       </div>
 
@@ -649,81 +767,65 @@ export function getWebDashboardHtml(port: number): string {
       </button>
     </div>
 
-    <!-- Section 3: Browser Tools & Integration -->
+    <!-- Section 3: Browser Floating Window & Integration -->
     <div id="section-tools" class="card" style="display: none;">
       <div style="display: flex; flex-direction: column; gap: 6px;">
-        <h3 style="font-size: 16px; font-weight: 600;">独立网站直推工具 (无需在本页面手动粘贴)</h3>
+        <h3 style="font-size: 16px; font-weight: 600;">网页通用悬浮窗与直推插件 (零权限要求 · 即开即用)</h3>
         <p style="font-size: 13px; color: var(--text-muted);">
-          为您在 MasterGo、Figma 或任意普通网页上提供专属无缝推送能力：选中即可推送到待办池！
+          为 MasterGo、Figma 或任意普通网页设计：<strong>无需任何企业插件导入权限</strong>，作为普通团队成员即可使用！
         </p>
       </div>
 
-      <!-- MasterGo Native Plugin Special Card -->
+      <!-- Universal Floating Window Hero Card -->
       <div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(16, 185, 129, 0.15) 100%); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 14px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
           <h4 style="font-size: 16px; font-weight: 700; color: #38BDF8; display: flex; align-items: center; gap: 8px;">
-            <span>🎨</span> MasterGo 官方原生插件 (首选推荐 · 100% 真实图层 2x 高清 PNG + SVG)
+            <span>⚡</span> 网页常驻悬浮窗 (支持随意关闭与再次打开 · 随时直接粘贴)
           </h4>
           <span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38BDF8; border-color: rgba(56, 189, 248, 0.4);">
-            原生引擎导出 · 零假图
+            零权限门槛 · 全网页通用
           </span>
         </div>
         <p style="font-size: 13px; color: #CBD5E1; line-height: 1.6;">
-          直接调用 MasterGo 内部图形引擎（<code>node.exportAsync</code>），选中任何图层即可秒级提取真实的 2x PNG 高保真截图、无损矢量 SVG 和 CSS 代码，彻底告别浏览器权限限制和绿色占位图！
+          安装扩展程序或油猴脚本后，在 MasterGo、Figma 或任何网页右下角均会常驻 <strong>【⚡ AI 设计待办】悬浮窗</strong>。
+          您无需在 MasterGo 里折腾开发者导入权限，直接在网页右键复制图层或按 Ctrl+V，悬浮窗即可<strong>自动识别高清 PNG、矢量 SVG 与 CSS 样式</strong>，实时预览核验，一键推入本地 AI 待办池！
         </p>
-        <div class="code-pill">
-          <span id="mg-plugin-path-text">D:\\Document\\design-bridge\\plugins\\mastergo-native-plugin\\manifest.json</span>
-          <button id="copy-mg-plugin-btn" class="btn-action">📋 复制插件路径</button>
-        </div>
         <div style="font-size: 12px; color: var(--text-muted); line-height: 1.8;">
-          <strong>只需 5 秒即可在 MasterGo 导入启用：</strong><br/>
-          1. 打开 MasterGo 文件，点击左上角主菜单 ➔ <strong>「插件」</strong> ➔ <strong>「开发插件」</strong> ➔ <strong>「导入插件」</strong>；<br/>
-          2. 选择上面的清单文件 <code>manifest.json</code> 即可！<br/>
-          3. 随后在 MasterGo 中选中任意图层，插件面板自动显示 2x 缩略图，点击 <strong>「⚡ 推送到本地 AI 待办池」</strong> 即可直推（还支持选中即自动直推）！
+          <strong>💡 悬浮窗核心特性：</strong><br/>
+          • <strong>可关闭 & 随时打开</strong>：点击悬浮窗右上角 <code>✕</code> 或 <code>—</code> 即可收起至右下角；点击 <code>⚡ AI 设计待办</code> 小胶囊或按快捷键 <strong><code>Alt + S</code></strong> 随时再次唤出！<br/>
+          • <strong>支持拖拽移动</strong>：按住顶部标题栏可任意拖动，绝不遮挡 MasterGo 画布设计图层；<br/>
+          • <strong>直接粘贴核验</strong>：在 MasterGo 右键复制 PNG / SVG / CSS 后，在悬浮窗内按 <code>Ctrl+V</code> 或点击「读取剪贴板」，自动完成装配与动态渲染！
         </div>
       </div>
 
-      <div class="tools-grid">
-        <div class="tool-card">
-          <div class="tool-card-title">
-            <span>⚡</span> MasterGo / Figma 专属工具
-          </div>
-          <div class="tool-card-desc">
-            <strong>复制即推 (Auto-push)</strong>：在 MasterGo 中选中任意图层并按下 <code>Ctrl+C</code>（或复制为 PNG <code>Ctrl+Shift+C</code>），插件自动提取图层图像与 SVG 矢量，0.2 秒无感推送至待办池！
-          </div>
-          <div class="tool-card-desc">
-            专属快捷键：<strong><code>Alt + S</code></strong> 一键直推（已避开 Chrome 地址栏热键冲突）。
-          </div>
-        </div>
-
-        <div class="tool-card">
-          <div class="tool-card-title">
-            <span>🎯</span> 任意网页【元素点选直推】
-          </div>
-          <div class="tool-card-desc">
-            <strong>元素吸取器 (Element Inspector)</strong>：在任意网页上按下 <code>Alt + X</code> 开启吸取器，鼠标移到卡片、表格、表单或按钮上实时高亮，单击直接截取高清截图与 Computed CSS 样式推入待办池！
-          </div>
-          <div class="tool-card-desc">
-            右键菜单：在任何选区或图片上右键，直接点击「⚡ 推送到 DesignBridge 待办池」。
-          </div>
-        </div>
-      </div>
-
+      <!-- Installation Guide: Chrome Extension -->
       <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
-        <h4 style="font-size: 14px; font-weight: 600; color: #93C5FD;">📦 Chrome 扩展程序一键安装路径</h4>
+        <h4 style="font-size: 14px; font-weight: 600; color: #93C5FD;">📦 方式一：加载 Chrome 扩展程序 (推荐 · 包含离线剪贴板读取与全页面悬浮窗)</h4>
         <p style="font-size: 13px; color: var(--text-muted);">
-          扩展源码已放置在本地，您只需打开 Chrome 的扩展程序管理器加载即可使用：
+          本地扩展程序源码已就绪，只需在 Chrome 中加载已解压的扩展程序即可：
         </p>
         <div class="code-pill">
           <span id="ext-path-text">D:\\Document\\design-bridge\\plugins\\extension-chrome</span>
-          <button id="copy-ext-path-btn" class="btn-action">📋 复制路径</button>
+          <button id="copy-ext-path-btn" class="btn-action">📋 复制扩展路径</button>
         </div>
         <ol style="font-size: 12px; color: var(--text-muted); line-height: 1.8; margin-left: 20px;">
-          <li>在 Chrome 浏览器地址栏输入：<code>chrome://extensions</code> 并回车；</li>
+          <li>在 Chrome 地址栏输入：<code>chrome://extensions</code> 并按回车；</li>
           <li>打开右上角 <strong>「开发者模式」</strong> 开关；</li>
-          <li>点击左上角 <strong>「加载已解压的扩展程序」</strong>，粘贴并选择上面的文件夹路径；</li>
-          <li>如果已加载，点击该扩展卡片右下角的 <strong>刷新 🔄</strong> 图标即可载入最新更新！</li>
+          <li>点击左上角 <strong>「加载已解压的扩展程序」</strong>，选择上面的文件夹路径；</li>
+          <li>打开 MasterGo 网页，右下角即可看到 <strong>【⚡ AI 设计待办】悬浮窗</strong>！</li>
         </ol>
+      </div>
+
+      <!-- Installation Guide: Userscript -->
+      <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+        <h4 style="font-size: 14px; font-weight: 600; color: #93C5FD;">📜 方式二：Tampermonkey 油猴脚本 (免装扩展)</h4>
+        <p style="font-size: 13px; color: var(--text-muted);">
+          若您使用油猴，直接新建脚本并将本地脚本内容粘贴保存即可：
+        </p>
+        <div class="code-pill">
+          <span id="userscript-path-text">D:\\Document\\design-bridge\\plugins\\adapters\\adapter-mastergo\\mastergo-bridge.user.js</span>
+          <button id="copy-userscript-path-btn" class="btn-action">📋 复制脚本路径</button>
+        </div>
       </div>
     </div>
   </div>
@@ -732,7 +834,8 @@ export function getWebDashboardHtml(port: number): string {
     let currentBase64 = '';
     let currentFilter = 'pending'; // 'pending' | 'all'
     let editingItemId = null;
-    let editingItemIndex = null;
+    let editingItemShortId = null;
+    let editingItemData = null;
 
     const tabInboxBtn = document.getElementById('tab-inbox-btn');
     const tabAddBtn = document.getElementById('tab-add-btn');
@@ -764,9 +867,18 @@ export function getWebDashboardHtml(port: number): string {
     // Edit Modal Elements
     const editModal = document.getElementById('edit-modal');
     const editModalBadge = document.getElementById('edit-modal-badge');
+    const editCloseX = document.getElementById('edit-close-x');
+    const editImgPreview = document.getElementById('edit-img-preview');
+    const editImgLink = document.getElementById('edit-img-link');
+    const editImgInfo = document.getElementById('edit-img-info');
+    const editSvgRenderContent = document.getElementById('edit-svg-render-content');
+    const editColorsList = document.getElementById('edit-colors-list');
     const editNameInput = document.getElementById('edit-name-input');
     const editNotesInput = document.getElementById('edit-notes-input');
     const editStatusSelect = document.getElementById('edit-status-select');
+    const editSvgInput = document.getElementById('edit-svg-input');
+    const editCssInput = document.getElementById('edit-css-input');
+    const editCopyPromptBtn = document.getElementById('edit-copy-prompt-btn');
     const editCancelBtn = document.getElementById('edit-cancel-btn');
     const editSaveBtn = document.getElementById('edit-save-btn');
 
@@ -789,7 +901,14 @@ export function getWebDashboardHtml(port: number): string {
         toast.style.opacity = '0';
         toast.style.transform = 'translateY(-10px)';
         setTimeout(() => toast.remove(), 200);
-      }, 3000);
+      }, 3200);
+    }
+
+    // Helper: Build Complete Explicit Prompt Command
+    function buildExplicitCommand(shortId, name, notes) {
+      const namePart = name ? '（名称：“' + name + '”）' : '';
+      const notesPart = notes ? '。具体设计要点与规则：“' + notes + '”' : '';
+      return '请使用 design-bridge MCP 获取设计待办 [ID: ' + shortId + ']' + namePart + '，参考其提取的高保真设计截图、矢量 SVG 与 CSS 样式 Token，帮我完整实现高质量的前端组件代码' + notesPart + '。';
     }
 
     // Custom Modal Functionality
@@ -825,26 +944,93 @@ export function getWebDashboardHtml(port: number): string {
       closeModal();
     };
 
+    // Live update SVG render in edit modal
+    editSvgInput.addEventListener('input', () => {
+      const val = editSvgInput.value.trim();
+      if (val && val.includes('<svg')) {
+        editSvgRenderContent.innerHTML = val;
+      } else {
+        editSvgRenderContent.innerHTML = '<span style="color:#64748B;font-size:12px;">无 SVG 矢量</span>';
+      }
+    });
+
     // Edit Modal Handlers
     function openEditModal(item) {
       editingItemId = item.id;
-      editingItemIndex = item.index;
-      editModalBadge.textContent = '#' + item.index;
+      editingItemShortId = item.shortId || item.id;
+      editingItemData = item;
+
+      editModalBadge.textContent = '🆔 ' + editingItemShortId;
       editNameInput.value = item.meta?.name || '';
       editNotesInput.value = item.userNotes || '';
       editStatusSelect.value = item.status || 'pending';
+
+      const imgSrc = '/api/image/' + encodeURIComponent(item.id);
+      editImgPreview.src = imgSrc;
+      editImgLink.href = imgSrc;
+      editImgInfo.textContent = (item.meta?.width ? item.meta.width + ' × ' + item.meta.height + 'px · ' : '') + '来源: ' + (item.source || '网页');
+
+      // Fetch complete details (including raw SVG and raw CSS from disk)
+      fetch('/api/capture/' + encodeURIComponent(item.id))
+        .then(res => res.json())
+        .then(detail => {
+          editingItemData = detail;
+          const svgText = detail.svgRaw || '';
+          editSvgInput.value = svgText;
+          if (svgText && svgText.includes('<svg')) {
+            editSvgRenderContent.innerHTML = svgText;
+          } else {
+            editSvgRenderContent.innerHTML = '<span style="color:#64748B;font-size:12px;">无 SVG 矢量</span>';
+          }
+
+          const cssText = detail.cssRaw || '';
+          editCssInput.value = cssText;
+
+          // Render colors
+          editColorsList.innerHTML = '';
+          const colors = detail.tokens?.colors || [];
+          if (colors.length > 0) {
+            colors.slice(0, 12).forEach(c => {
+              const chip = document.createElement('div');
+              chip.className = 'color-chip';
+              chip.innerHTML = '<span class="color-chip-box" style="background:' + c.hex + ';"></span><span>' + c.hex + '</span>';
+              editColorsList.appendChild(chip);
+            });
+          } else {
+            editColorsList.innerHTML = '<span style="color:#64748B;font-size:11px;">未检测到独立色板</span>';
+          }
+        })
+        .catch(() => {
+          editSvgRenderContent.innerHTML = '<span style="color:#64748B;font-size:12px;">加载失败</span>';
+        });
+
       editModal.classList.add('show');
     }
 
     function closeEditModal() {
       editModal.classList.remove('show');
       editingItemId = null;
-      editingItemIndex = null;
+      editingItemShortId = null;
+      editingItemData = null;
     }
 
+    editCloseX.onclick = closeEditModal;
     editCancelBtn.onclick = closeEditModal;
     editModal.onclick = (e) => {
       if (e.target === editModal) closeEditModal();
+    };
+
+    // Copy Prompt inside Modal
+    editCopyPromptBtn.onclick = () => {
+      if (!editingItemShortId) return;
+      const text = buildExplicitCommand(
+        editingItemShortId,
+        editNameInput.value.trim(),
+        editNotesInput.value.trim()
+      );
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('已复制完整明确的 AI 指令！直接粘贴到聊天中即可。', 'success');
+      });
     };
 
     editSaveBtn.onclick = () => {
@@ -852,6 +1038,8 @@ export function getWebDashboardHtml(port: number): string {
       const newName = editNameInput.value.trim();
       const newNotes = editNotesInput.value.trim();
       const newStatus = editStatusSelect.value;
+      const newSvg = editSvgInput.value.trim();
+      const newCss = editCssInput.value.trim();
 
       editSaveBtn.disabled = true;
       editSaveBtn.textContent = '正在保存...';
@@ -863,12 +1051,14 @@ export function getWebDashboardHtml(port: number): string {
           name: newName,
           userNotes: newNotes,
           status: newStatus,
+          svgRaw: newSvg,
+          cssRaw: newCss,
         }),
       })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          showToast('✅ 设计 #' + editingItemIndex + ' 修改成功！', 'success');
+          showToast('✅ 设计 [ID: ' + editingItemShortId + '] 保存修改成功！', 'success');
           closeEditModal();
           loadInbox();
         } else {
@@ -913,24 +1103,22 @@ export function getWebDashboardHtml(port: number): string {
     tabAddBtn.onclick = () => switchTab(tabAddBtn, sectionAdd);
     tabToolsBtn.onclick = () => switchTab(tabToolsBtn, sectionTools);
 
-    // MasterGo native plugin path copy button
-    const copyMgPluginBtn = document.getElementById('copy-mg-plugin-btn');
-    if (copyMgPluginBtn) {
-      copyMgPluginBtn.onclick = () => {
-        const path = document.getElementById('mg-plugin-path-text').innerText;
-        navigator.clipboard.writeText(path).then(() => {
-          showToast('已复制 MasterGo 插件清单路径！去 MasterGo 导入吧', 'success');
-        });
-      };
-    }
-
-    // Extension path copy button
+    // Copy path buttons
     const copyExtPathBtn = document.getElementById('copy-ext-path-btn');
     if (copyExtPathBtn) {
       copyExtPathBtn.onclick = () => {
         const path = document.getElementById('ext-path-text').innerText;
         navigator.clipboard.writeText(path).then(() => {
-          showToast('已复制扩展程序目录路径到剪贴板！', 'success');
+          showToast('已复制 Chrome 扩展程序路径！前往 chrome://extensions 加载', 'success');
+        });
+      };
+    }
+    const copyUserscriptPathBtn = document.getElementById('copy-userscript-path-btn');
+    if (copyUserscriptPathBtn) {
+      copyUserscriptPathBtn.onclick = () => {
+        const path = document.getElementById('userscript-path-text').innerText;
+        navigator.clipboard.writeText(path).then(() => {
+          showToast('已复制 Tampermonkey 脚本文件路径！', 'success');
         });
       };
     }
@@ -941,7 +1129,7 @@ export function getWebDashboardHtml(port: number): string {
       if (file) handleImageFile(file);
     };
 
-    // Paste event handler
+    // Paste event handler on page
     window.addEventListener('paste', (e) => {
       const items = e.clipboardData?.items;
       if (!items) return;
@@ -973,10 +1161,11 @@ export function getWebDashboardHtml(port: number): string {
     submitBtn.onclick = () => {
       const name = document.getElementById('name-input').value.trim();
       const svgText = document.getElementById('svg-input').value.trim();
+      const cssText = document.getElementById('css-input').value.trim();
       const notes = document.getElementById('notes-input').value.trim();
 
-      if (!currentBase64 && !svgText) {
-        showToast('请至少粘贴一张设计截图，或粘贴 SVG 矢量代码！', 'error');
+      if (!currentBase64 && !svgText && !cssText) {
+        showToast('请至少粘贴一张设计截图、SVG 矢量代码或 CSS 样式！', 'error');
         return;
       }
 
@@ -993,6 +1182,7 @@ export function getWebDashboardHtml(port: number): string {
           meta: { name: name || '未命名设计' },
           image: { base64: finalBase64 },
           vector: { svgRaw: svgText },
+          styles: { cssRaw: cssText },
           userNotes: notes
         })
       })
@@ -1003,11 +1193,13 @@ export function getWebDashboardHtml(port: number): string {
           previewBox.style.display = 'none';
           document.getElementById('name-input').value = '';
           document.getElementById('svg-input').value = '';
+          document.getElementById('css-input').value = '';
           document.getElementById('notes-input').value = '';
           dropzoneText.innerHTML = '点击此处选择图片，或直接在页面任意处按下 Ctrl+V 粘贴截图';
           dropzone.style.borderColor = 'rgba(255, 255, 255, 0.2)';
 
-          showToast('🎉 成功加入设计待办池 #' + data.index + '！', 'success');
+          const shortId = data.shortId || data.id;
+          showToast('🎉 成功加入设计待办池 [ID: ' + shortId + ']！', 'success');
           tabInboxBtn.click();
         } else {
           showToast('存入失败: ' + (data.error || '未知错误'), 'error');
@@ -1040,13 +1232,14 @@ export function getWebDashboardHtml(port: number): string {
 
           items.forEach(item => {
             const timeStr = new Date(item.timestamp).toLocaleTimeString();
+            const shortId = item.shortId || item.id;
 
             const card = document.createElement('div');
             card.className = 'inbox-item';
 
             const badge = document.createElement('span');
             badge.className = 'item-badge';
-            badge.textContent = '#' + item.index;
+            badge.textContent = '🆔 ' + shortId;
 
             const thumb = document.createElement('img');
             thumb.className = 'item-thumb';
@@ -1081,30 +1274,33 @@ export function getWebDashboardHtml(port: number): string {
 
             const meta = document.createElement('div');
             meta.className = 'item-meta';
-            meta.textContent = 'ID: ' + item.id + ' · 时间: ' + timeStr;
+            meta.textContent = '永久 ID: ' + shortId + ' · 时间: ' + timeStr + ' · 来源: ' + (item.source || '网页');
             content.appendChild(meta);
 
             const actions = document.createElement('div');
             actions.className = 'item-actions';
 
-            // Edit button
+            // Edit / Detail button
             const editBtn = document.createElement('button');
             editBtn.className = 'btn-action btn-edit';
             editBtn.setAttribute('data-id', item.id);
-            editBtn.textContent = '✏️ 编辑';
+            editBtn.textContent = '✏️ 查看/编辑';
             editBtn.onclick = () => openEditModal(item);
 
-            // Copy button
+            // Complete explicit command copy button
             const copyBtn = document.createElement('button');
             copyBtn.className = 'btn-action btn-copy';
-            copyBtn.setAttribute('data-index', String(item.index));
-            copyBtn.textContent = '📋 复制指令';
+            copyBtn.setAttribute('data-id', item.id);
+            copyBtn.setAttribute('data-short-id', shortId);
+            copyBtn.setAttribute('data-name', item.meta.name || '');
+            copyBtn.setAttribute('data-notes', item.userNotes || '');
+            copyBtn.textContent = '📋 复制完整指令';
 
             // Delete button
             const delBtn = document.createElement('button');
             delBtn.className = 'btn-action btn-delete';
             delBtn.setAttribute('data-id', item.id);
-            delBtn.setAttribute('data-index', String(item.index));
+            delBtn.setAttribute('data-short-id', shortId);
             delBtn.textContent = '🗑️ 删除';
 
             actions.appendChild(editBtn);
@@ -1129,17 +1325,17 @@ export function getWebDashboardHtml(port: number): string {
       if (!btn) return;
       if (btn.classList.contains('btn-delete')) {
         const id = btn.getAttribute('data-id');
-        const index = btn.getAttribute('data-index');
+        const shortId = btn.getAttribute('data-short-id');
         if (id) {
           showConfirmModal({
-            title: '确认删除设计 #' + index,
+            title: '确认删除设计 [ID: ' + shortId + ']',
             message: '确定要从待办池中移除该设计任务吗？此操作将彻底删除本地数据。',
             confirmText: '🗑️ 确认删除',
             isDanger: true,
             onConfirm: () => {
               fetch('/api/capture/' + encodeURIComponent(id), { method: 'DELETE' })
                 .then(() => {
-                  showToast('已删除设计 #' + index, 'info');
+                  showToast('已删除设计 [ID: ' + shortId + ']', 'info');
                   loadInbox();
                 })
                 .catch(err => {
@@ -1149,19 +1345,21 @@ export function getWebDashboardHtml(port: number): string {
           });
         }
       } else if (btn.classList.contains('btn-copy')) {
-        const index = btn.getAttribute('data-index');
-        if (index) {
-          const text = '帮我实现设计 #' + index;
-          navigator.clipboard.writeText(text).then(() => {
+        const shortId = btn.getAttribute('data-short-id');
+        const name = btn.getAttribute('data-name');
+        const notes = btn.getAttribute('data-notes');
+        if (shortId) {
+          const commandText = buildExplicitCommand(shortId, name, notes);
+          navigator.clipboard.writeText(commandText).then(() => {
             btn.classList.add('copied');
-            btn.textContent = '✅ 已复制！';
+            btn.textContent = '✅ 已复制完整指令！';
             setTimeout(() => {
               btn.classList.remove('copied');
-              btn.textContent = '📋 复制指令';
-            }, 2000);
-            showToast('已复制指令「' + text + '」，去 AI 窗口粘贴发送吧！', 'success');
+              btn.textContent = '📋 复制完整指令';
+            }, 2500);
+            showToast('已复制完整明确指令，直接粘贴到 AI 聊天即可！', 'success');
           }).catch(() => {
-            showToast('复制失败，请手动输入：' + text, 'error');
+            showToast('复制失败，请手动复制：' + commandText, 'error');
           });
         }
       }

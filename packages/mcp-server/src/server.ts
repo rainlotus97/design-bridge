@@ -43,14 +43,15 @@ export function createDesignBridgeMcpServer(cacheManager: CacheManager): McpServ
         const timeStr = new Date(item.timestamp).toLocaleTimeString();
         const statusIcon = item.status === 'completed' ? '✅ 已完成' : '⏳ 待办';
         const notes = item.userNotes ? `\n   > 需求备注: ${item.userNotes}` : '';
-        return `* **#${item.index}** \`[${item.id}]\` **${item.meta.name || '未命名图层'}** (${statusIcon} | ${timeStr})${notes}\n   图片路径: \`${item.imagePath}\``;
+        const idLabel = item.shortId || item.id;
+        return `* **\`[ID: ${idLabel}]\`** **${item.meta.name || '未命名图层'}** (${statusIcon} | ${timeStr})${notes}\n   图片路径: \`${item.imagePath}\``;
       });
 
       return {
         content: [
           {
             type: 'text',
-            text: `### 📋 设计待办池 (共 ${items.length} 项)\n\n${rows.join('\n\n')}\n\n---\n💡 **使用提示**：您可以直接告诉我：“*实现设计 #1*” 或 “*读取设计 [ID]*”，我将自动获取对应设计的视觉细节与代码规范。不需要的设计可说：“*删除设计 #1*”。`,
+            text: `### 📋 设计待办池 (共 ${items.length} 项)\n\n${rows.join('\n\n')}\n\n---\n💡 **使用提示**：您可以直接告诉我：“*实现设计 [ID]*”（例如：\`实现设计 ${items[0]?.shortId || items[0]?.id}\`），我将自动获取对应设计的视觉细节与代码规范。`,
           },
         ],
       };
@@ -111,7 +112,7 @@ export function createDesignBridgeMcpServer(cacheManager: CacheManager): McpServ
         content: [
           {
             type: 'text',
-            text: `> 🎯 已定位到待办项 **#${capture.index}** [${capture.id}] - ${capture.meta.name || '未命名'}\n\n${markdownPrompt}`,
+            text: `> 🎯 已定位到待办项 **[ID: ${capture.shortId || capture.id}]** - ${capture.meta.name || '未命名'}\n\n${markdownPrompt}`,
           },
         ],
       };

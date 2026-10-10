@@ -245,5 +245,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       sendResponse({ dataUrl: dataUrl });
     });
     return true; // async
+  } else if (msg.action === 'read-clipboard-data') {
+    readClipboard().then((clipResult) => {
+      sendResponse(clipResult || {});
+    }).catch((err) => {
+      sendResponse({ error: err.message });
+    });
+    return true; // async
   }
 });
+
