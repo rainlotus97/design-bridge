@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "DesignBridge - AI 设计与网页直推助手",
-  "version": "1.2.0",
-  "description": "MasterGo/Figma 选中即推送、任意网页元素点选直推至本地 AI (Antigravity/MCP)",
+  "version": "1.3.0",
+  "description": "MasterGo/Figma 选中即推送、设计资产一键直推至本地 AI (Antigravity/MCP)",
   "action": {
     "default_popup": "popup.html",
     "default_title": "DesignBridge 直推助手"
@@ -12,7 +12,17 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": [
+        "https://*.mastergo.com/*",
+        "https://mastergo.com/*",
+        "https://*.figma.com/*",
+        "https://figma.com/*",
+        "https://*.lanhuapp.com/*",
+        "https://*.pixso.cn/*",
+        "https://*.js.design/*",
+        "https://*.canva.cn/*",
+        "https://*.canva.com/*"
+      ],
       "js": ["content.js"],
       "run_at": "document_end"
     }

@@ -6,9 +6,26 @@
   window.__DESIGN_BRIDGE_INITIALIZED__ = true;
 
   const BRIDGE_URL = 'http://127.0.0.1:23851';
-  const isMasterGo = location.hostname.includes('mastergo.com');
-  const isFigma = location.hostname.includes('figma.com');
-  const isDesignApp = isMasterGo || isFigma;
+
+  // Only allow on professional design platforms by default
+  const DEFAULT_DESIGN_DOMAINS = [
+    'mastergo.com',
+    'figma.com',
+    'lanhuapp.com',
+    'pixso.cn',
+    'js.design',
+    'canva.com',
+    'canva.cn',
+  ];
+
+  const host = location.hostname.toLowerCase();
+  const isDesignApp = DEFAULT_DESIGN_DOMAINS.some((d) => host === d || host.endsWith('.' + d));
+
+  // Exit immediately on regular web pages! Never pollute normal websites or apps!
+  if (!isDesignApp) return;
+
+  const isMasterGo = host.includes('mastergo.com');
+  const isFigma = host.includes('figma.com');
 
   let autoPushOnCopy = false; // default off to let user inspect/paste into floating window
   let isInspectMode = false;
@@ -135,34 +152,53 @@
     const trigger = document.createElement('div');
     trigger.id = 'db-floating-trigger';
     trigger.innerHTML = `
-      <span style="font-size: 15px;">⚡</span>
-      <span style="font-weight: 700;">AI 设计待办</span>
+      <div id="db-trigger-main" style="display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 14px;">⚡</span>
+        <span style="font-weight: 700; font-size: 12px;">AI 设计待办</span>
+      </div>
+      <span id="db-trigger-close" title="隐藏悬浮球 (按 Alt+S 可随时重新唤出)" style="
+        font-size: 11px;
+        color: #94A3B8;
+        padding: 2px 4px;
+        margin-left: 2px;
+        cursor: pointer;
+        line-height: 1;
+        border-radius: 4px;
+      ">✕</span>
     `;
     Object.assign(trigger.style, {
       position: 'fixed',
       bottom: '24px',
       right: '24px',
       zIndex: '2147483640',
-      backgroundColor: '#0F172A',
+      backgroundColor: 'rgba(15, 23, 42, 0.92)',
       color: '#38BDF8',
       borderRadius: '24px',
-      border: '1px solid rgba(56, 189, 248, 0.4)',
-      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.45)',
+      border: '1px solid rgba(56, 189, 248, 0.35)',
+      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
+      backdropFilter: 'blur(8px)',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      display: 'none', // initially hidden if panel is open, or visible if closed
+      display: 'flex', // Only small pill shown on design sites
       alignItems: 'center',
-      gap: '8px',
-      padding: '8px 16px',
-      cursor: 'pointer',
+      gap: '6px',
+      padding: '7px 12px',
+      cursor: 'move',
       userSelect: 'none',
-      fontSize: '13px',
-      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+      fontSize: '12px',
+      transition: 'box-shadow 0.2s ease',
     });
-    trigger.onmouseenter = () => { trigger.style.transform = 'translateY(-2px)'; };
-    trigger.onmouseleave = () => { trigger.style.transform = 'translateY(0)'; };
-    trigger.onclick = () => openFloatingPanel();
 
-    // 2. Full Floating Window Panel
+    makeDraggable(trigger, trigger);
+
+    trigger.querySelector('#db-trigger-main').onclick = () => openFloatingPanel();
+    const triggerCloseBtn = trigger.querySelector('#db-trigger-close');
+    triggerCloseBtn.onclick = (e) => {
+      e.stopPropagation();
+      trigger.style.display = 'none';
+      showToast('已隐藏悬浮球，按快捷键 Alt+S 可随时重新唤出', 'info');
+    };
+
+    // 2. Full Floating Window Panel (DEFAULT CLOSED: 默认绝对不打开大窗口)
     const panel = document.createElement('div');
     panel.id = 'db-floating-panel';
     Object.assign(panel.style, {
@@ -178,7 +214,7 @@
       border: '1px solid rgba(255, 255, 255, 0.14)',
       boxShadow: '0 20px 60px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(56, 189, 248, 0.2)',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      display: 'flex',
+      display: 'none', // 默认彻底关闭大悬浮窗！
       flexDirection: 'column',
       overflow: 'hidden',
       userSelect: 'none',
