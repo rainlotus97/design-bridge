@@ -9,6 +9,7 @@ export function getWebDashboardHtml(port: number): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DesignBridge - 设计待办池与 AI 桥梁</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
   <style>
     :root {
       --bg: #0B0F19;
@@ -470,28 +471,73 @@ export function getWebDashboardHtml(port: number): string {
         .then(res => res.json())
         .then(items => {
           inboxCount.innerText = items.length;
+          inboxList.innerHTML = '';
           if (items.length === 0) {
-            inboxList.innerHTML = '<div class="empty-state">📭 待办池为空。<br/><button class="btn-action" onclick="tabAddBtn.click()" style="margin-top: 10px;">➕ 立即粘贴添加设计</button></div>';
+            inboxList.innerHTML = '<div class="empty-state">📭 待办池为空。<br/><button id="btn-quick-add" class="btn-action" style="margin-top: 10px;">➕ 立即粘贴添加设计</button></div>';
+            const quickAdd = document.getElementById('btn-quick-add');
+            if (quickAdd) quickAdd.onclick = () => tabAddBtn.click();
             return;
           }
 
-          inboxList.innerHTML = items.map(item => {
+          items.forEach(item => {
             const timeStr = new Date(item.timestamp).toLocaleTimeString();
-            const notesHtml = item.userNotes ? '<div class="item-notes">📝 ' + escapeHtml(item.userNotes) + '</div>' : '';
-            return '<div class="inbox-item">' +
-              '<span class="item-badge">#' + item.index + '</span>' +
-              '<img class="item-thumb" src="/api/image/' + item.id + '" onerror="this.style.display=\'none\'" alt="thumb" />' +
-              '<div class="item-content">' +
-                '<div class="item-title">' + escapeHtml(item.meta.name || '设计图层') + '</div>' +
-                notesHtml +
-                '<div class="item-meta">ID: ' + item.id + ' · 时间: ' + timeStr + '</div>' +
-              '</div>' +
-              '<div class="item-actions">' +
-                '<button class="btn-action btn-copy" data-index="' + item.index + '">📋 复制指令</button>' +
-                '<button class="btn-action btn-delete" data-id="' + item.id + '">🗑️ 删除</button>' +
-              '</div>' +
-            '</div>';
-          }).join('');
+
+            const card = document.createElement('div');
+            card.className = 'inbox-item';
+
+            const badge = document.createElement('span');
+            badge.className = 'item-badge';
+            badge.textContent = '#' + item.index;
+
+            const thumb = document.createElement('img');
+            thumb.className = 'item-thumb';
+            thumb.src = '/api/image/' + encodeURIComponent(item.id);
+            thumb.alt = 'thumb';
+            thumb.onerror = () => { thumb.style.display = 'none'; };
+
+            const content = document.createElement('div');
+            content.className = 'item-content';
+
+            const title = document.createElement('div');
+            title.className = 'item-title';
+            title.textContent = item.meta.name || '未命名设计';
+            content.appendChild(title);
+
+            if (item.userNotes) {
+              const notes = document.createElement('div');
+              notes.className = 'item-notes';
+              notes.textContent = '📝 ' + item.userNotes;
+              content.appendChild(notes);
+            }
+
+            const meta = document.createElement('div');
+            meta.className = 'item-meta';
+            meta.textContent = 'ID: ' + item.id + ' · 时间: ' + timeStr;
+            content.appendChild(meta);
+
+            const actions = document.createElement('div');
+            actions.className = 'item-actions';
+
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'btn-action btn-copy';
+            copyBtn.setAttribute('data-index', String(item.index));
+            copyBtn.textContent = '📋 复制指令';
+
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn-action btn-delete';
+            delBtn.setAttribute('data-id', item.id);
+            delBtn.textContent = '🗑️ 删除';
+
+            actions.appendChild(copyBtn);
+            actions.appendChild(delBtn);
+
+            card.appendChild(badge);
+            card.appendChild(thumb);
+            card.appendChild(content);
+            card.appendChild(actions);
+
+            inboxList.appendChild(card);
+          });
         })
         .catch(err => {
           inboxList.innerHTML = '<div class="empty-state">加载失败: ' + err.message + '</div>';

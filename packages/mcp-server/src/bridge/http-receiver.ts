@@ -45,6 +45,11 @@ export class HttpReceiver {
       res.send(getWebDashboardHtml(this.port));
     });
 
+    // Favicon handler
+    this.app.get('/favicon.ico', (_req: Request, res: Response) => {
+      res.status(204).end();
+    });
+
     // 2. Health check
     this.app.get('/health', (_req: Request, res: Response) => {
       res.json({
