@@ -480,14 +480,15 @@ export function getWebDashboardHtml(port: number): string {
             const notesHtml = item.userNotes ? '<div class="item-notes">📝 ' + escapeHtml(item.userNotes) + '</div>' : '';
             return '<div class="inbox-item">' +
               '<span class="item-badge">#' + item.index + '</span>' +
+              '<img class="item-thumb" src="/api/image/' + item.id + '" onerror="this.style.display=\'none\'" alt="thumb" />' +
               '<div class="item-content">' +
                 '<div class="item-title">' + escapeHtml(item.meta.name || '设计图层') + '</div>' +
                 notesHtml +
                 '<div class="item-meta">ID: ' + item.id + ' · 时间: ' + timeStr + '</div>' +
               '</div>' +
               '<div class="item-actions">' +
-                '<button class="btn-action" onclick="copyPrompt(' + item.index + ')">📋 复制指令</button>' +
-                '<button class="btn-action btn-delete" onclick="deleteItem(\\\\'' + item.id + '\\\\')">🗑️ 删除</button>' +
+                '<button class="btn-action btn-copy" data-index="' + item.index + '">📋 复制指令</button>' +
+                '<button class="btn-action btn-delete" data-id="' + item.id + '">🗑️ 删除</button>' +
               '</div>' +
             '</div>';
           }).join('');
@@ -497,18 +498,24 @@ export function getWebDashboardHtml(port: number): string {
         });
     }
 
-    window.copyPrompt = (index) => {
-      const text = '帮我实现设计 #' + index;
-      navigator.clipboard.writeText(text).then(() => {
-        alert('已复制指令到剪贴板：\\n\\n"' + text + '"\\n\\n直接粘贴发送给 Antigravity AI 即可！');
-      });
-    };
-
-    window.deleteItem = (id) => {
-      if (!confirm('确认删除该设计项？')) return;
-      fetch('/api/capture/' + id, { method: 'DELETE' })
-        .then(() => loadInbox());
-    };
+    inboxList.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      if (btn.classList.contains('btn-delete')) {
+        const id = btn.getAttribute('data-id');
+        if (id && confirm('确认删除该设计项？')) {
+          fetch('/api/capture/' + id, { method: 'DELETE' }).then(() => loadInbox());
+        }
+      } else if (btn.classList.contains('btn-copy')) {
+        const index = btn.getAttribute('data-index');
+        if (index) {
+          const text = '帮我实现设计 #' + index;
+          navigator.clipboard.writeText(text).then(() => {
+            alert('已复制指令到剪贴板：\\n\\n"' + text + '"\\n\\n直接粘贴发送给 Antigravity AI 即可！');
+          });
+        }
+      }
+    });
 
     clearAllBtn.onclick = () => {
       if (!confirm('确定要清空全部待办设计吗？此操作将删除所有本地设计缓存。')) return;

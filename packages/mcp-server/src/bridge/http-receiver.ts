@@ -156,6 +156,17 @@ export class HttpReceiver {
       res.json(this.cacheManager.getHistory());
     });
 
+    // 9. Serve thumbnail image for a capture
+    this.app.get('/api/image/:id', (req: Request, res: Response): void => {
+      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      const capture = this.cacheManager.getByIdOrIndex(id);
+      if (capture && capture.imagePath) {
+        res.sendFile(capture.imagePath);
+      } else {
+        res.status(404).send('Image not found');
+      }
+    });
+
     // 9. Delete specific capture by ID or index
     this.app.delete('/api/capture/:id', (req: Request, res: Response): void => {
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
