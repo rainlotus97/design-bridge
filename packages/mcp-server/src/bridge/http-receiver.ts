@@ -126,8 +126,9 @@ export class HttpReceiver {
         res.json({
           success: true,
           id: stored.id,
+          index: stored.index,
           imagePath: stored.imagePath,
-          message: 'Design captured and cached successfully for AI',
+          message: `Design captured and cached as #${stored.index}`,
         });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
@@ -145,9 +146,47 @@ export class HttpReceiver {
       res.json(latest);
     });
 
-    // 7. List historical captures
+    // 7. Get Design Inbox (active/pending items)
+    this.app.get('/api/inbox', (_req: Request, res: Response): void => {
+      res.json(this.cacheManager.getInbox());
+    });
+
+    // 8. List all historical captures
     this.app.get('/api/history', (_req: Request, res: Response): void => {
       res.json(this.cacheManager.getHistory());
+    });
+
+    // 9. Delete specific capture by ID or index
+    this.app.delete('/api/capture/:id', (req: Request, res: Response): void => {
+      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      const success = this.cacheManager.deleteCapture(id);
+      if (success) {
+        res.json({ success: true, message: `Capture ${id} deleted` });
+      } else {
+        res.status(404).json({ error: 'Capture not found' });
+      }
+    });
+
+    // 10. Clear entire Design Inbox
+    this.app.post('/api/clear', (_req: Request, res: Response): void => {
+      const count = this.cacheManager.clearAll();
+      res.json({ success: true, clearedCount: count });
+    });
+
+    // 11. Update status of a capture
+    this.app.patch('/api/capture/:id', (req: Request, res: Response): void => {
+      const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      const { status } = req.body as { status: 'pending' | 'completed' };
+      if (!status || !['pending', 'completed'].includes(status)) {
+        res.status(400).json({ error: 'Invalid status: must be "pending" or "completed"' });
+        return;
+      }
+      const success = this.cacheManager.updateStatus(id, status);
+      if (success) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ error: 'Capture not found' });
+      }
     });
   }
 

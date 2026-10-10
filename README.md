@@ -7,8 +7,25 @@
 
 ## 🌟 核心特性与双模使用方式
 
-### 1. 无需绝对路径的 MCP Server（URL 协议直连）
-告别死板的本地绝对路径配置，服务运行后原生提供 **SSE 远程 MCP 端点**：
+### 1. 多智能体 MCP 无缝接入 (Claude Code / Grok / Codex / Antigravity)
+
+DesignBridge 原生支持 **Stdio 本地管道** 与 **SSE 远程端点** 双模式：
+
+#### 命令行一键接入（推荐 Stdio 随调随起）
+- **Claude Code**:
+  ```bash
+  claude mcp add --scope user design-bridge node "D:/Document/design-bridge/packages/mcp-server/dist/bin/cli.js" stdio
+  ```
+- **Grok CLI**:
+  ```bash
+  grok mcp add design-bridge -- node "D:/Document/design-bridge/packages/mcp-server/dist/bin/cli.js" stdio
+  ```
+- **Codex CLI**:
+  ```bash
+  codex mcp add design-bridge -- node "D:/Document/design-bridge/packages/mcp-server/dist/bin/cli.js" stdio
+  ```
+
+#### 常驻服务模式（SSE 端点，需运行 `start.bat`）
 ```json
 {
   "mcpServers": {
@@ -18,6 +35,10 @@
   }
 }
 ```
+或通过命令行添加：
+- `claude mcp add --transport sse --scope user design-bridge http://127.0.0.1:23851/sse`
+- `grok mcp add --transport sse design-bridge http://127.0.0.1:23851/sse`
+- `codex mcp add design-bridge --url http://127.0.0.1:23851/sse`
 
 ### 2. 双重免油猴采集方式
 - **方式 A：内置 Web 捕获中心（零插件依赖）**
