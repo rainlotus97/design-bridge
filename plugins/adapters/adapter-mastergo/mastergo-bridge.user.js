@@ -1,10 +1,11 @@
 // ==UserScript==
-// @name         DesignBridge for MasterGo
+// @name         DesignBridge for MasterGo (选中即推专属版)
 // @namespace    https://github.com/design-bridge/adapter-mastergo
-// @version      0.1.0
-// @description  一键提取 MasterGo 选中图层 (PNG截图 + SVG矢量 + CSS标注) 发送至本地 AI (Antigravity/MCP)
+// @version      1.1.0
+// @description  在 MasterGo 中选中图层按 Ctrl+C 即可全自动推送至本地 AI (Antigravity/MCP) 待办池
 // @author       DesignBridge
 // @match        https://mastergo.com/*
+// @match        https://*.mastergo.com/*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @connect      127.0.0.1
@@ -15,274 +16,257 @@
   'use strict';
 
   const BRIDGE_URL = 'http://127.0.0.1:23851/api/capture';
+  let autoPushOnCopy = true;
 
-  // Create floating button
-  function createFloatingButton() {
-    const btn = document.createElement('div');
-    btn.id = 'design-bridge-pill';
-    btn.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-        <span style="font-size: 16px;">⚡</span>
-        <span style="font-weight: 600; font-size: 13px;">发送到 AI</span>
-      </div>
+  // Custom Dark Toast
+  function showToast(msg, type = 'success') {
+    let container = document.getElementById('db-toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'db-toast-container';
+      Object.assign(container.style, {
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        zIndex: '2147483647',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+        pointerEvents: 'none',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      });
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    const isError = type === 'error';
+    const isInfo = type === 'info';
+
+    toast.innerHTML = `
+      <span style="font-size: 15px;">${isError ? '❌' : isInfo ? 'ℹ️' : '⚡'}</span>
+      <span style="font-size: 13px; font-weight: 600; line-height: 1.4;">${msg}</span>
     `;
 
-    Object.assign(btn.style, {
-      position: 'fixed',
-      bottom: '32px',
-      right: '32px',
-      zIndex: '999999',
-      backgroundColor: '#1E293B',
+    Object.assign(toast.style, {
+      pointerEvents: 'auto',
+      backgroundColor: isError ? 'rgba(239, 68, 68, 0.95)' : isInfo ? 'rgba(30, 41, 59, 0.95)' : 'rgba(16, 185, 129, 0.95)',
       color: '#FFFFFF',
-      padding: '8px 16px',
-      borderRadius: '24px',
-      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      transition: 'all 0.2s ease',
-      userSelect: 'none',
-    });
-
-    btn.addEventListener('mouseenter', () => {
-      btn.style.transform = 'translateY(-2px)';
-      btn.style.backgroundColor = '#334155';
-    });
-    btn.addEventListener('mouseleave', () => {
-      btn.style.transform = 'translateY(0)';
-      btn.style.backgroundColor = '#1E293B';
-    });
-
-    btn.addEventListener('click', openCaptureModal);
-    document.body.appendChild(btn);
-  }
-
-  // Create Modal Drawer
-  function openCaptureModal() {
-    const existing = document.getElementById('design-bridge-modal');
-    if (existing) existing.remove();
-
-    const overlay = document.createElement('div');
-    overlay.id = 'design-bridge-modal';
-    Object.assign(overlay.style, {
-      position: 'fixed',
-      inset: '0',
-      zIndex: '1000000',
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
-      backdropFilter: 'blur(4px)',
+      padding: '10px 16px',
+      borderRadius: '10px',
+      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
+      backdropFilter: 'blur(10px)',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      gap: '8px',
+      maxWidth: '380px',
+      transition: 'all 0.25s ease',
+      transform: 'translateY(0)',
+      opacity: '1',
     });
 
-    const card = document.createElement('div');
-    Object.assign(card.style, {
-      width: '460px',
-      backgroundColor: '#0F172A',
-      color: '#F8FAFC',
-      borderRadius: '16px',
-      border: '1px solid rgba(255, 255, 255, 0.12)',
-      padding: '24px',
-      boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '16px',
-    });
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-8px)';
+      setTimeout(() => toast.remove(), 250);
+    }, 3200);
+  }
 
-    card.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="margin: 0; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-          <span>⚡</span> 发送至 AI 编程助手
-        </h3>
-        <button id="db-close-btn" style="background: none; border: none; color: #94A3B8; cursor: pointer; font-size: 18px;">✕</button>
-      </div>
+  // Push Clipboard to Local Server
+  async function pushFromClipboard() {
+    try {
+      const clipboardItems = await navigator.clipboard.read();
+      let imageBase64 = '';
+      let svgText = '';
 
-      <div style="font-size: 13px; color: #94A3B8; line-height: 1.5;">
-        若已在 MasterGo 中右键复制了 SVG，可直接粘贴在下方；或粘贴截图图片。
-      </div>
-
-      <div style="display: flex; flex-direction: column; gap: 6px;">
-        <label style="font-size: 12px; color: #CBD5E1; font-weight: 500;">用户个性化需求 / 补充规则 (可选)：</label>
-        <input id="db-user-notes" placeholder="例如：采用 Vue 3 + Tailwind 实现、指标为动态插槽..." style="
-          background: #1E293B;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          color: #FFFFFF;
-          padding: 8px 12px;
-          border-radius: 8px;
-          font-size: 13px;
-          outline: none;
-        " />
-      </div>
-
-      <div style="display: flex; flex-direction: column; gap: 6px;">
-        <label style="font-size: 12px; color: #CBD5E1; font-weight: 500;">SVG 代码 (可选，用于精确色值/滤镜/边距抽取)：</label>
-        <textarea id="db-svg-input" placeholder="贴入 MasterGo 复制出的 SVG 文本 (Ctrl + V)..." rows="3" style="
-          background: #1E293B;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          color: #FFFFFF;
-          padding: 8px 12px;
-          border-radius: 8px;
-          font-size: 12px;
-          font-family: monospace;
-          resize: vertical;
-          outline: none;
-        "></textarea>
-      </div>
-
-      <div style="display: flex; flex-direction: column; gap: 6px;">
-        <label style="font-size: 12px; color: #CBD5E1; font-weight: 500;">粘贴图片截图 (可在任意位置 Ctrl+V 或点击下方上传)：</label>
-        <div id="db-paste-box" style="
-          border: 1px dashed rgba(255, 255, 255, 0.2);
-          border-radius: 8px;
-          padding: 16px;
-          text-align: center;
-          color: #94A3B8;
-          font-size: 12px;
-          background: rgba(255, 255, 255, 0.02);
-          cursor: pointer;
-        ">
-          📸 点击此处或按 Ctrl+V 粘贴截图
-        </div>
-      </div>
-
-      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px;">
-        <button id="db-cancel-btn" style="
-          background: transparent;
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          color: #CBD5E1;
-          padding: 8px 16px;
-          border-radius: 8px;
-          font-size: 13px;
-          cursor: pointer;
-        ">取消</button>
-        <button id="db-submit-btn" style="
-          background: #2563EB;
-          border: none;
-          color: #FFFFFF;
-          padding: 8px 20px;
-          border-radius: 8px;
-          font-size: 13px;
-          font-weight: 500;
-          cursor: pointer;
-        ">确认发送给 AI</button>
-      </div>
-    `;
-
-    overlay.appendChild(card);
-    document.body.appendChild(overlay);
-
-    let capturedBase64 = '';
-
-    // Handle Paste events
-    const pasteBox = card.querySelector('#db-paste-box');
-    const handlePaste = (e) => {
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      for (const item of items) {
-        if (item.type.startsWith('image/')) {
-          const blob = item.getAsFile();
-          if (blob) {
-            const reader = new FileReader();
-            reader.onload = (evt) => {
-              capturedBase64 = evt.target.result;
-              pasteBox.innerHTML = `✅ 已成功载入截图 (${Math.round(blob.size / 1024)} KB)`;
-              pasteBox.style.borderColor = '#10B981';
-              pasteBox.style.color = '#10B981';
-            };
-            reader.readAsDataURL(blob);
+      for (const item of clipboardItems) {
+        for (const type of item.types) {
+          if (type.startsWith('image/')) {
+            const blob = await item.getType(type);
+            imageBase64 = await blobToBase64(blob);
+          } else if (type === 'text/html' || type === 'image/svg+xml') {
+            const blob = await item.getType(type);
+            const text = await blob.text();
+            if (text.includes('<svg') || type === 'image/svg+xml') {
+              svgText = text;
+            }
+          } else if (type === 'text/plain') {
+            const blob = await item.getType(type);
+            const text = await blob.text();
+            if (text.trim().startsWith('<svg')) {
+              svgText = text.trim();
+            }
           }
         }
       }
-    };
-    overlay.addEventListener('paste', handlePaste);
 
-    // Close actions
-    card.querySelector('#db-close-btn').onclick = () => overlay.remove();
-    card.querySelector('#db-cancel-btn').onclick = () => overlay.remove();
-
-    // Submit Action
-    card.querySelector('#db-submit-btn').onclick = () => {
-      const svgText = card.querySelector('#db-svg-input').value.trim();
-      const userNotes = card.querySelector('#db-user-notes').value.trim();
-
-      // If no image pasted, create a fallback placeholder or prompt
-      if (!capturedBase64 && !svgText) {
-        alert('请至少粘贴截图或输入 SVG 代码！');
+      if (!imageBase64 && !svgText) {
+        showToast('剪贴板中未检测到图层图片或 SVG 代码，请先在 MasterGo 中复制图层！', 'info');
         return;
       }
 
-      // Default 1x1 transparent png if image is omitted but svg is provided
-      const finalImageBase64 = capturedBase64 || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      const finalBase64 = imageBase64 || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
       const payload = {
         source: 'mastergo',
-        timestamp: Date.now(),
         meta: {
           name: document.title || 'MasterGo Layer',
-          url: window.location.href,
+          url: location.href,
         },
-        image: {
-          base64: finalImageBase64,
-          mimeType: 'image/png',
-        },
-        vector: {
-          svgRaw: svgText,
-        },
-        userNotes: userNotes,
+        image: { base64: finalBase64 },
+        vector: { svgRaw: svgText },
+        userNotes: '',
       };
 
-      const btn = card.querySelector('#db-submit-btn');
-      btn.innerText = '发送中...';
-      btn.disabled = true;
-
-      fetch(BRIDGE_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success) {
-            overlay.remove();
-            showToast('✅ 成功推送到本地 AI 桥梁！AI 对话端可直接读取。');
-          } else {
-            alert('推送失败: ' + (data.error || '未知错误'));
-            btn.innerText = '确认发送给 AI';
-            btn.disabled = false;
+      if (typeof GM_xmlhttpRequest !== 'undefined') {
+        GM_xmlhttpRequest({
+          method: 'POST',
+          url: BRIDGE_URL,
+          headers: { 'Content-Type': 'application/json' },
+          data: JSON.stringify(payload),
+          onload: (response) => {
+            try {
+              const data = JSON.parse(response.responseText);
+              if (data.success) {
+                showToast(`⚡ 已成功推入设计待办池 #${data.index}！`, 'success');
+              } else {
+                showToast(`推送失败: ${data.error || '未知错误'}`, 'error');
+              }
+            } catch {
+              showToast('解析服务响应异常', 'error');
+            }
+          },
+          onerror: (err) => {
+            showToast(`连接本地服务失败 (23851): ${err}`, 'error');
           }
-        })
-        .catch((err) => {
-          alert('无法连接到本地桥梁服务 (127.0.0.1:23851)，请确保 MCP 服务已启动！\n\n错误信息: ' + err.message);
-          btn.innerText = '确认发送给 AI';
-          btn.disabled = false;
         });
+      } else {
+        const res = await fetch(BRIDGE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`⚡ 已成功推入设计待办池 #${data.index}！`, 'success');
+        } else {
+          showToast(`推送失败: ${data.error || '未知错误'}`, 'error');
+        }
+      }
+    } catch (err) {
+      showToast(`读取剪贴板异常: ${err.message}`, 'error');
+    }
+  }
+
+  function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  // Auto-push on Copy listener (Ctrl+C in MasterGo)
+  window.addEventListener('copy', () => {
+    if (!autoPushOnCopy) return;
+    setTimeout(() => {
+      pushFromClipboard();
+    }, 150);
+  });
+
+  // Hotkey Alt+D
+  window.addEventListener('keydown', (e) => {
+    if (e.altKey && (e.key === 'd' || e.key === 'D')) {
+      e.preventDefault();
+      pushFromClipboard();
+    }
+  });
+
+  // Floating Island Dock
+  function createFloatingDock() {
+    if (document.getElementById('db-floating-dock')) return;
+
+    const dock = document.createElement('div');
+    dock.id = 'db-floating-dock';
+
+    Object.assign(dock.style, {
+      position: 'fixed',
+      bottom: '24px',
+      right: '24px',
+      zIndex: '2147483640',
+      backgroundColor: '#0F172A',
+      color: '#F8FAFC',
+      borderRadius: '24px',
+      border: '1px solid rgba(255, 255, 255, 0.12)',
+      boxShadow: '0 8px 30px rgba(0, 0, 0, 0.45)',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      padding: '6px 14px',
+      transition: 'all 0.2s ease',
+      userSelect: 'none',
+      fontSize: '12px',
+    });
+
+    dock.innerHTML = `
+      <div id="db-btn-logo" style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+        <span style="font-size: 16px;">⚡</span>
+        <span style="font-weight: 700; color: #38BDF8;">MasterGo 桥梁</span>
+      </div>
+
+      <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.15);"></div>
+
+      <button id="db-btn-push" title="立即读取剪贴板推送到待办池 (Alt+D)" style="
+        background: rgba(59, 130, 246, 0.2);
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        color: #93C5FD;
+        padding: 4px 10px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 11px;
+      ">⚡ 推送选中 (Alt+D)</button>
+
+      <button id="db-btn-toggle" title="切换复制即推" style="
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #34D399;
+        padding: 4px 8px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 11px;
+      ">📋 复制即推: 🟢 开</button>
+
+      <button id="db-btn-inbox" title="打开待办中心" style="
+        background: transparent;
+        border: none;
+        color: #94A3B8;
+        cursor: pointer;
+        padding: 4px;
+        font-size: 14px;
+      ">🌐</button>
+    `;
+
+    document.body.appendChild(dock);
+
+    dock.querySelector('#db-btn-logo').onclick = () => window.open('http://127.0.0.1:23851/', '_blank');
+    dock.querySelector('#db-btn-inbox').onclick = () => window.open('http://127.0.0.1:23851/', '_blank');
+    dock.querySelector('#db-btn-push').onclick = () => pushFromClipboard();
+
+    const toggleBtn = dock.querySelector('#db-btn-toggle');
+    toggleBtn.onclick = () => {
+      autoPushOnCopy = !autoPushOnCopy;
+      toggleBtn.style.color = autoPushOnCopy ? '#34D399' : '#94A3B8';
+      toggleBtn.textContent = `📋 复制即推: ${autoPushOnCopy ? '🟢 开' : '⚪ 关'}`;
+      showToast(autoPushOnCopy ? '已开启【复制即推】：在 MasterGo 中按 Ctrl+C 将自动推入待办池' : '已关闭【复制即推】', 'info');
     };
   }
 
-  function showToast(msg) {
-    const toast = document.createElement('div');
-    toast.innerText = msg;
-    Object.assign(toast.style, {
-      position: 'fixed',
-      top: '24px',
-      left: '50%',
-      transform: 'translateX(-50%)',
-      backgroundColor: '#059669',
-      color: '#FFFFFF',
-      padding: '10px 20px',
-      borderRadius: '8px',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-      zIndex: '1000001',
-      fontSize: '13px',
-      fontWeight: '500',
-    });
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3500);
-  }
-
-  // Initialize
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    createFloatingButton();
+    createFloatingDock();
   } else {
-    window.addEventListener('DOMContentLoaded', createFloatingButton);
+    window.addEventListener('DOMContentLoaded', createFloatingDock);
   }
 })();

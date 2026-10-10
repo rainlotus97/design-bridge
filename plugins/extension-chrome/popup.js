@@ -21,12 +21,24 @@ async function checkStatus() {
   statusEl.innerText = '🔴 服务未启动 (23851)';
 }
 
-document.getElementById('open-web-btn').onclick = () => {
-  chrome.tabs.create({ url: `${SERVER_URL}/` });
+document.getElementById('inspect-btn').onclick = async () => {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (tab?.id) {
+    chrome.tabs.sendMessage(tab.id, { action: 'start-inspect' });
+    window.close();
+  }
 };
 
-document.getElementById('check-btn').onclick = () => {
-  checkStatus();
+document.getElementById('clipboard-push-btn').onclick = async () => {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (tab?.id) {
+    chrome.tabs.sendMessage(tab.id, { action: 'push-clipboard' });
+    window.close();
+  }
+};
+
+document.getElementById('open-web-btn').onclick = () => {
+  chrome.tabs.create({ url: `${SERVER_URL}/` });
 };
 
 checkStatus();

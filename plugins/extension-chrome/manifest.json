@@ -1,31 +1,45 @@
 {
   "manifest_version": 3,
-  "name": "DesignBridge - AI 设计转代码助手",
-  "version": "1.0.0",
-  "description": "一键提取 MasterGo、Figma、蓝湖等设计稿视觉截图与 SVG，直通本地 AI 编程助手",
+  "name": "DesignBridge - AI 设计与网页直推助手",
+  "version": "1.1.0",
+  "description": "MasterGo/Figma 选中即推送、任意网页元素点选直推至本地 AI (Antigravity/MCP)",
   "action": {
     "default_popup": "popup.html",
-    "default_title": "DesignBridge"
+    "default_title": "DesignBridge 直推助手"
+  },
+  "background": {
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": [
-        "*://mastergo.com/*",
-        "*://*.mastergo.com/*",
-        "*://www.figma.com/*",
-        "*://*.lanhuapp.com/*",
-        "*://pixso.cn/*"
-      ],
+      "matches": ["<all_urls>"],
       "js": ["content.js"],
       "run_at": "document_end"
     }
   ],
   "permissions": [
     "activeTab",
-    "clipboardRead"
+    "clipboardRead",
+    "contextMenus",
+    "storage"
   ],
   "host_permissions": [
     "http://127.0.0.1:23851/*",
-    "http://localhost:23851/*"
-  ]
+    "http://localhost:23851/*",
+    "<all_urls>"
+  ],
+  "commands": {
+    "inspect-element": {
+      "suggested_key": {
+        "default": "Alt+X"
+      },
+      "description": "开启网页元素点选直推"
+    },
+    "push-clipboard": {
+      "suggested_key": {
+        "default": "Alt+D"
+      },
+      "description": "剪贴板一键推送"
+    }
+  }
 }

@@ -112,9 +112,16 @@ export class HttpReceiver {
     this.app.post('/api/capture', (req: Request, res: Response): void => {
       try {
         const payload = req.body as CapturedDesignPayload;
-        if (!payload || !payload.image?.base64) {
-          res.status(400).json({ error: 'Invalid payload: missing image base64' });
+        if (!payload) {
+          res.status(400).json({ error: 'Invalid payload: empty request body' });
           return;
+        }
+
+        // Graceful fallback if image base64 is missing
+        if (!payload.image?.base64) {
+          payload.image = payload.image || { base64: '' };
+          payload.image.base64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+          payload.image.mimeType = 'image/png';
         }
 
         // Extract tokens from SVG if available

@@ -21,12 +21,13 @@ export function getWebDashboardHtml(port: number): string {
       --text-muted: #94A3B8;
       --success: #10B981;
       --danger: #EF4444;
+      --warning: #F59E0B;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -35,7 +36,7 @@ export function getWebDashboardHtml(port: number): string {
     }
     .container {
       width: 100%;
-      max-width: 960px;
+      max-width: 980px;
       display: flex;
       flex-direction: column;
       gap: 24px;
@@ -60,7 +61,7 @@ export function getWebDashboardHtml(port: number): string {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 4px 10px;
+      padding: 4px 12px;
       border-radius: 999px;
       font-size: 12px;
       font-weight: 500;
@@ -70,7 +71,7 @@ export function getWebDashboardHtml(port: number): string {
     }
     .tabs {
       display: flex;
-      gap: 12px;
+      gap: 8px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       padding-bottom: 8px;
     }
@@ -78,16 +79,22 @@ export function getWebDashboardHtml(port: number): string {
       background: transparent;
       border: none;
       color: var(--text-muted);
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 600;
-      padding: 8px 16px;
+      padding: 9px 18px;
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s;
     }
+    .tab-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+    }
     .tab-btn.active {
       color: var(--text);
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(59, 130, 246, 0.15);
+      color: #60A5FA;
+      border: 1px solid rgba(59, 130, 246, 0.3);
     }
     .card {
       background: var(--card-bg);
@@ -97,6 +104,127 @@ export function getWebDashboardHtml(port: number): string {
       display: flex;
       flex-direction: column;
       gap: 16px;
+    }
+    .inbox-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .btn-danger-outline {
+      background: transparent;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #F87171;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-danger-outline:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.6);
+    }
+    .inbox-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .inbox-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 14px 18px;
+      transition: all 0.2s;
+    }
+    .inbox-item:hover {
+      border-color: rgba(59, 130, 246, 0.4);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .item-badge {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(59, 130, 246, 0.15);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(59, 130, 246, 0.25);
+    }
+    .item-thumb {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #0B0F19;
+      flex-shrink: 0;
+    }
+    .item-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+    .item-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-notes {
+      font-size: 12px;
+      color: #CBD5E1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .item-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .btn-action {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text);
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    .btn-copy.copied {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: rgba(16, 185, 129, 0.5);
+      color: #34D399;
+    }
+    .btn-delete {
+      color: #F87171;
+      border-color: rgba(239, 68, 68, 0.25);
+    }
+    .btn-delete:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.5);
     }
     .dropzone {
       border: 2px dashed rgba(255, 255, 255, 0.2);
@@ -158,115 +286,13 @@ export function getWebDashboardHtml(port: number): string {
       background: #0B1120;
       border-radius: 10px;
       border: 1px solid rgba(255, 255, 255, 0.06);
+      text-align: center;
     }
     .preview-img {
       max-width: 100%;
       max-height: 240px;
       border-radius: 8px;
-      object-fit: contain;
-      background: #111;
-    }
-
-    /* Inbox List Styles */
-    .inbox-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .btn-danger-outline {
-      background: transparent;
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      color: #F87171;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-danger-outline:hover {
-      background: rgba(239, 68, 68, 0.15);
-    }
-    .inbox-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .inbox-item {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      background: #0B1120;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 12px 16px;
-      transition: border-color 0.2s;
-    }
-    .inbox-item:hover {
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-    .item-badge {
-      background: rgba(59, 130, 246, 0.2);
-      color: #60A5FA;
-      border: 1px solid rgba(59, 130, 246, 0.4);
-      font-size: 13px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 8px;
-      white-space: nowrap;
-    }
-    .item-thumb {
-      width: 64px;
-      height: 64px;
-      border-radius: 8px;
-      object-fit: cover;
-      background: #1E293B;
       border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .item-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .item-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .item-notes {
-      font-size: 12px;
-      color: #93C5FD;
-      line-height: 1.4;
-    }
-    .item-meta {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-    .item-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .btn-action {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text);
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      cursor: pointer;
-      transition: background 0.2s;
-      white-space: nowrap;
-    }
-    .btn-action:hover {
-      background: rgba(255, 255, 255, 0.15);
-    }
-    .btn-delete {
-      color: #F87171;
-      border-color: rgba(239, 68, 68, 0.2);
-    }
-    .btn-delete:hover {
-      background: rgba(239, 68, 68, 0.15);
     }
     .empty-state {
       padding: 48px 24px;
@@ -275,9 +301,195 @@ export function getWebDashboardHtml(port: number): string {
       font-size: 14px;
       line-height: 1.6;
     }
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .tool-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .tool-card-title {
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tool-card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .code-pill {
+      background: #0B1120;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-family: monospace;
+      font-size: 12px;
+      color: #93C5FD;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      word-break: break-all;
+    }
+
+    /* Custom Toast Container */
+    #toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 999999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .toast {
+      pointer-events: auto;
+      background: #151D2F;
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(12px);
+      animation: toastSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.2s;
+      max-width: 380px;
+    }
+    .toast.toast-success {
+      border-color: rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.15);
+      color: #ECFDF5;
+    }
+    .toast.toast-error {
+      border-color: rgba(239, 68, 68, 0.4);
+      background: rgba(239, 68, 68, 0.15);
+      color: #FEF2F2;
+    }
+    .toast.toast-info {
+      border-color: rgba(59, 130, 246, 0.4);
+      background: rgba(59, 130, 246, 0.15);
+      color: #EFF6FF;
+    }
+    @keyframes toastSlideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Custom Modal Component */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-backdrop.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-card {
+      background: #151D2F;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      transform: scale(0.95);
+      transition: transform 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .modal-backdrop.show .modal-card {
+      transform: scale(1);
+    }
+    .modal-title {
+      font-size: 17px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .modal-body {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .btn-modal-cancel {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.2s;
+    }
+    .btn-modal-cancel:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .btn-modal-confirm {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      padding: 8px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: opacity 0.2s;
+    }
+    .btn-modal-confirm.danger {
+      background: var(--danger);
+    }
+    .btn-modal-confirm:hover {
+      opacity: 0.9;
+    }
   </style>
 </head>
 <body>
+  <!-- Toast Notification Root -->
+  <div id="toast-container"></div>
+
+  <!-- Custom Confirmation Modal Root -->
+  <div id="custom-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div id="modal-title" class="modal-title">提示</div>
+      <div id="modal-body" class="modal-body">内容</div>
+      <div class="modal-actions">
+        <button id="modal-cancel-btn" class="btn-modal-cancel">取消</button>
+        <button id="modal-confirm-btn" class="btn-modal-confirm">确认</button>
+      </div>
+    </div>
+  </div>
+
   <div class="container">
     <div class="header">
       <div class="header-title">
@@ -292,6 +504,7 @@ export function getWebDashboardHtml(port: number): string {
     <div class="tabs">
       <button id="tab-inbox-btn" class="tab-btn active">📋 设计待办池 (<span id="inbox-count">0</span>)</button>
       <button id="tab-add-btn" class="tab-btn">➕ 提交新设计</button>
+      <button id="tab-tools-btn" class="tab-btn">🛠️ 浏览器专属插件 (独立页面直推)</button>
     </div>
 
     <!-- Section 1: Inbox List -->
@@ -345,14 +558,68 @@ export function getWebDashboardHtml(port: number): string {
         <span>📥</span> 加入设计待办池
       </button>
     </div>
+
+    <!-- Section 3: Browser Tools & Integration -->
+    <div id="section-tools" class="card" style="display: none;">
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <h3 style="font-size: 16px; font-weight: 600;">独立网站直推工具 (无需在本页面手动粘贴)</h3>
+        <p style="font-size: 13px; color: var(--text-muted);">
+          为您在 MasterGo、Figma 或任意普通网页上提供专属无缝推送能力：选中即可推送到待办池！
+        </p>
+      </div>
+
+      <div class="tools-grid">
+        <div class="tool-card">
+          <div class="tool-card-title">
+            <span>⚡</span> MasterGo / Figma 专属工具
+          </div>
+          <div class="tool-card-desc">
+            <strong>复制即推 (Auto-push)</strong>：在 MasterGo 中选中任意图层并按下 <code>Ctrl+C</code>，插件自动提取图层图像与 SVG 矢量，0.1 秒静默推送至待办池，完全不需要弹窗确认！
+          </div>
+          <div class="tool-card-desc">
+            快捷键：选中图层后按 <code>Alt + D</code> 立即直推。
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-title">
+            <span>🎯</span> 任意网页【元素点选直推】
+          </div>
+          <div class="tool-card-desc">
+            <strong>元素吸取器 (Element Inspector)</strong>：在任意网页上按下 <code>Alt + X</code> 开启吸取器，鼠标移到卡片、表格、表单或按钮上实时高亮，单击直接截取高清截图与 Computed CSS 样式推入待办池！
+          </div>
+          <div class="tool-card-desc">
+            右键菜单：在任何选区或图片上右键，直接点击「⚡ 推送到 DesignBridge 待办池」。
+          </div>
+        </div>
+      </div>
+
+      <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px;">
+        <h4 style="font-size: 14px; font-weight: 600; color: #93C5FD;">📦 Chrome 扩展程序一键安装路径</h4>
+        <p style="font-size: 13px; color: var(--text-muted);">
+          扩展源码已放置在本地，您只需打开 Chrome 的扩展程序管理器加载即可使用：
+        </p>
+        <div class="code-pill">
+          <span id="ext-path-text">D:\\Document\\design-bridge\\plugins\\extension-chrome</span>
+          <button id="copy-ext-path-btn" class="btn-action">📋 复制路径</button>
+        </div>
+        <ol style="font-size: 12px; color: var(--text-muted); line-height: 1.8; margin-left: 20px;">
+          <li>在 Chrome 浏览器地址栏输入：<code>chrome://extensions</code> 并回车；</li>
+          <li>打开右上角 <strong>「开发者模式」</strong> 开关；</li>
+          <li>点击左上角 <strong>「加载已解压的扩展程序」</strong>，粘贴并选择上面的文件夹路径即可！</li>
+        </ol>
+      </div>
+    </div>
   </div>
 
   <script>
     let currentBase64 = '';
     const tabInboxBtn = document.getElementById('tab-inbox-btn');
     const tabAddBtn = document.getElementById('tab-add-btn');
+    const tabToolsBtn = document.getElementById('tab-tools-btn');
     const sectionInbox = document.getElementById('section-inbox');
     const sectionAdd = document.getElementById('section-add');
+    const sectionTools = document.getElementById('section-tools');
     const inboxList = document.getElementById('inbox-list');
     const inboxCount = document.getElementById('inbox-count');
     const clearAllBtn = document.getElementById('clear-all-btn');
@@ -364,20 +631,94 @@ export function getWebDashboardHtml(port: number): string {
     const dropzoneText = document.getElementById('dropzone-text');
     const submitBtn = document.getElementById('submit-btn');
 
+    const toastContainer = document.getElementById('toast-container');
+    const customModal = document.getElementById('custom-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+    const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+    const modalCancelBtn = document.getElementById('modal-cancel-btn');
+    let activeModalConfirmCallback = null;
+
+    // Toast Functionality (replaces browser native alerts)
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = 'toast toast-' + type;
+
+      const icon = document.createElement('span');
+      icon.textContent = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+      toast.appendChild(icon);
+
+      const text = document.createElement('span');
+      text.textContent = message;
+      toast.appendChild(text);
+
+      toastContainer.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-10px)';
+        setTimeout(() => toast.remove(), 200);
+      }, 3000);
+    }
+
+    // Custom Modal Functionality (replaces browser native confirm/alert)
+    function showConfirmModal(options) {
+      modalTitle.textContent = options.title || '提示';
+      modalBody.textContent = options.message || '';
+      modalConfirmBtn.textContent = options.confirmText || '确定';
+      modalCancelBtn.textContent = options.cancelText || '取消';
+
+      if (options.isDanger) {
+        modalConfirmBtn.className = 'btn-modal-confirm danger';
+      } else {
+        modalConfirmBtn.className = 'btn-modal-confirm';
+      }
+
+      activeModalConfirmCallback = options.onConfirm || null;
+      customModal.classList.add('show');
+    }
+
+    function closeModal() {
+      customModal.classList.remove('show');
+      activeModalConfirmCallback = null;
+    }
+
+    modalCancelBtn.onclick = closeModal;
+    customModal.onclick = (e) => {
+      if (e.target === customModal) closeModal();
+    };
+    modalConfirmBtn.onclick = () => {
+      if (activeModalConfirmCallback) {
+        activeModalConfirmCallback();
+      }
+      closeModal();
+    };
+
     // Switch Tabs
+    function switchTab(activeBtn, activeSection) {
+      [tabInboxBtn, tabAddBtn, tabToolsBtn].forEach(b => b.classList.remove('active'));
+      [sectionInbox, sectionAdd, sectionTools].forEach(s => s.style.display = 'none');
+      activeBtn.classList.add('active');
+      activeSection.style.display = 'flex';
+    }
+
     tabInboxBtn.onclick = () => {
-      tabInboxBtn.classList.add('active');
-      tabAddBtn.classList.remove('active');
-      sectionInbox.style.display = 'flex';
-      sectionAdd.style.display = 'none';
+      switchTab(tabInboxBtn, sectionInbox);
       loadInbox();
     };
-    tabAddBtn.onclick = () => {
-      tabAddBtn.classList.add('active');
-      tabInboxBtn.classList.remove('active');
-      sectionAdd.style.display = 'flex';
-      sectionInbox.style.display = 'none';
-    };
+    tabAddBtn.onclick = () => switchTab(tabAddBtn, sectionAdd);
+    tabToolsBtn.onclick = () => switchTab(tabToolsBtn, sectionTools);
+
+    // Extension path copy button
+    const copyExtPathBtn = document.getElementById('copy-ext-path-btn');
+    if (copyExtPathBtn) {
+      copyExtPathBtn.onclick = () => {
+        const path = document.getElementById('ext-path-text').innerText;
+        navigator.clipboard.writeText(path).then(() => {
+          showToast('已复制扩展程序目录路径到剪贴板！', 'success');
+        });
+      };
+    }
 
     dropzone.onclick = () => fileInput.click();
     fileInput.onchange = (e) => {
@@ -394,7 +735,8 @@ export function getWebDashboardHtml(port: number): string {
           const file = item.getAsFile();
           if (file) {
             handleImageFile(file);
-            tabAddBtn.click(); // switch to add view
+            tabAddBtn.click();
+            showToast('已载入剪贴板截图图片', 'info');
           }
         }
       }
@@ -419,7 +761,7 @@ export function getWebDashboardHtml(port: number): string {
       const notes = document.getElementById('notes-input').value.trim();
 
       if (!currentBase64 && !svgText) {
-        alert('请至少粘贴一张设计截图，或粘贴 SVG 矢量代码！');
+        showToast('请至少粘贴一张设计截图，或粘贴 SVG 矢量代码！', 'error');
         return;
       }
 
@@ -442,7 +784,6 @@ export function getWebDashboardHtml(port: number): string {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          // Reset form
           currentBase64 = '';
           previewBox.style.display = 'none';
           document.getElementById('name-input').value = '';
@@ -451,13 +792,14 @@ export function getWebDashboardHtml(port: number): string {
           dropzoneText.innerHTML = '点击此处选择图片，或直接在页面任意处按下 Ctrl+V 粘贴截图';
           dropzone.style.borderColor = 'rgba(255, 255, 255, 0.2)';
 
-          tabInboxBtn.click(); // switch back to inbox
+          showToast('🎉 成功加入设计待办池 #' + data.index + '！', 'success');
+          tabInboxBtn.click();
         } else {
-          alert('存入失败: ' + (data.error || '未知错误'));
+          showToast('存入失败: ' + (data.error || '未知错误'), 'error');
         }
       })
       .catch(err => {
-        alert('网络请求失败: ' + err.message);
+        showToast('网络请求失败: ' + err.message, 'error');
       })
       .finally(() => {
         submitBtn.innerHTML = '<span>📥</span> 加入设计待办池';
@@ -526,6 +868,7 @@ export function getWebDashboardHtml(port: number): string {
             const delBtn = document.createElement('button');
             delBtn.className = 'btn-action btn-delete';
             delBtn.setAttribute('data-id', item.id);
+            delBtn.setAttribute('data-index', String(item.index));
             delBtn.textContent = '🗑️ 删除';
 
             actions.appendChild(copyBtn);
@@ -549,29 +892,62 @@ export function getWebDashboardHtml(port: number): string {
       if (!btn) return;
       if (btn.classList.contains('btn-delete')) {
         const id = btn.getAttribute('data-id');
-        if (id && confirm('确认删除该设计项？')) {
-          fetch('/api/capture/' + id, { method: 'DELETE' }).then(() => loadInbox());
+        const index = btn.getAttribute('data-index');
+        if (id) {
+          showConfirmModal({
+            title: '确认删除设计 #' + index,
+            message: '确定要从待办池中移除该设计任务吗？此操作将彻底删除本地数据。',
+            confirmText: '🗑️ 确认删除',
+            isDanger: true,
+            onConfirm: () => {
+              fetch('/api/capture/' + id, { method: 'DELETE' })
+                .then(() => {
+                  showToast('已删除设计 #' + index, 'info');
+                  loadInbox();
+                })
+                .catch(err => {
+                  showToast('删除失败: ' + err.message, 'error');
+                });
+            }
+          });
         }
       } else if (btn.classList.contains('btn-copy')) {
         const index = btn.getAttribute('data-index');
         if (index) {
           const text = '帮我实现设计 #' + index;
           navigator.clipboard.writeText(text).then(() => {
-            alert('已复制指令到剪贴板：\\n\\n"' + text + '"\\n\\n直接粘贴发送给 Antigravity AI 即可！');
+            btn.classList.add('copied');
+            btn.textContent = '✅ 已复制！';
+            setTimeout(() => {
+              btn.classList.remove('copied');
+              btn.textContent = '📋 复制指令';
+            }, 2000);
+            showToast('已复制指令「' + text + '」，去 AI 窗口粘贴发送吧！', 'success');
+          }).catch(() => {
+            showToast('复制失败，请手动输入：' + text, 'error');
           });
         }
       }
     });
 
     clearAllBtn.onclick = () => {
-      if (!confirm('确定要清空全部待办设计吗？此操作将删除所有本地设计缓存。')) return;
-      fetch('/api/clear', { method: 'POST' })
-        .then(() => loadInbox());
+      showConfirmModal({
+        title: '确认清空待办池',
+        message: '确定要清空全部待办设计吗？此操作将删除所有本地待办项及磁盘缓存。',
+        confirmText: '🧹 确认清空',
+        isDanger: true,
+        onConfirm: () => {
+          fetch('/api/clear', { method: 'POST' })
+            .then(() => {
+              showToast('已清空全部待办设计', 'info');
+              loadInbox();
+            })
+            .catch(err => {
+              showToast('清空失败: ' + err.message, 'error');
+            });
+        }
+      });
     };
-
-    function escapeHtml(str) {
-      return (str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
-    }
 
     // Initial load
     loadInbox();
